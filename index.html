@@ -52,7 +52,6 @@
     #status-dot.error  { background: var(--error);   animation: none; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-    /* Model selector */
     #model-row {
       display: flex; align-items: center; gap: 10px;
       width: 100%; max-width: 640px; margin-bottom: 18px;
@@ -71,12 +70,23 @@
     }
     #load-btn:disabled { opacity: .45; cursor: not-allowed; }
 
-    /* Progress bar model load */
     #model-progress-wrap { width: 100%; max-width: 640px; margin-bottom: 16px; display: none; }
     #model-progress-wrap.visible { display: block; }
     #model-progress-label { font-size: 0.8rem; color: var(--subtext); margin-bottom: 6px; }
     #model-progress-bg { height: 5px; background: var(--card); border-radius: 99px; overflow: hidden; }
     #model-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 99px; transition: width .3s; }
+
+    /* Chunk settings */
+    #chunk-row {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; max-width: 640px; margin-bottom: 18px;
+    }
+    #chunk-row label { font-size: 0.82rem; color: var(--subtext); white-space: nowrap; }
+    #chunk-select {
+      flex:1; background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); padding: 7px 11px;
+      font-size: 0.84rem; outline: none;
+    }
 
     .card {
       width: 100%; max-width: 640px;
@@ -165,6 +175,30 @@
     #progress-bar-bg { height: 6px; background: var(--card); border-radius: 99px; overflow: hidden; }
     #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 99px; transition: width .4s; }
 
+    /* Chunks live log */
+    #chunks-log {
+      display: none; margin-top: 14px;
+      background: var(--card); border-radius: 10px;
+      padding: 10px 14px; max-height: 180px; overflow-y: auto;
+      font-size: 0.78rem; line-height: 1.7; color: var(--subtext);
+    }
+    #chunks-log.visible { display: block; }
+    #chunks-log .chunk-item { margin-bottom: 4px; }
+    #chunks-log .chunk-item.done { color: var(--success); }
+    #chunks-log .chunk-item.processing { color: var(--accent); animation: pulse 1s infinite; }
+    #chunks-log .chunk-item.err { color: var(--error); }
+
+    /* Background notice */
+    #bg-notice {
+      display: none;
+      width: 100%; max-width: 640px;
+      background: rgba(76,175,136,.1); border: 1px solid rgba(76,175,136,.3);
+      border-radius: 10px; padding: 11px 16px;
+      font-size: 0.82rem; color: #6dcfaa;
+      margin-bottom: 14px;
+    }
+    #bg-notice.visible { display: flex; align-items: center; gap: 9px; }
+
     #result-card {
       display: none; width: 100%; max-width: 640px;
       background: var(--surface); border: 1px solid var(--border);
@@ -218,6 +252,12 @@
   <span id="status-text">Aguardando carregamento do modelo…</span>
 </div>
 
+<!-- Background processing notice -->
+<div id="bg-notice">
+  <span>🔄</span>
+  <span>Processando em segundo plano — pode trocar de app, a transcrição continua!</span>
+</div>
+
 <!-- Model loader -->
 <div id="model-row">
   <label for="model-select">Modelo:</label>
@@ -233,6 +273,17 @@
 <div id="model-progress-wrap">
   <div id="model-progress-label">Baixando modelo… (apenas no primeiro uso)</div>
   <div id="model-progress-bg"><div id="model-progress-bar"></div></div>
+</div>
+
+<!-- Chunk size -->
+<div id="chunk-row">
+  <label for="chunk-select">Bloco de:</label>
+  <select id="chunk-select">
+    <option value="60">1 minuto — mais leve</option>
+    <option value="180">3 minutos</option>
+    <option value="300" selected>5 minutos ✅ recomendado</option>
+    <option value="600">10 minutos — menos divisões</option>
+  </select>
 </div>
 
 <div class="card">
@@ -285,9 +336,12 @@
     <div id="progress-bar-bg"><div id="progress-bar"></div></div>
   </div>
 
+  <!-- Log de blocos em tempo real -->
+  <div id="chunks-log"></div>
+
   <div class="info-box">
-    <strong>ℹ️ Como funciona</strong>
-    Clique em <b>Carregar modelo</b> uma vez — o modelo Whisper é baixado do HuggingFace e fica em cache no seu browser. Nas próximas vezes, carrega instantaneamente. Todo processamento acontece no seu dispositivo.
+    <strong>ℹ️ Roda em segundo plano</strong>
+    O processamento usa Web Worker — pode trocar de app, minimizar o browser ou mudar de aba. A transcrição continua e você recebe o resultado quando voltar.
   </div>
 </div>
 
@@ -307,15 +361,12 @@
 <div id="toast"></div>
 
 <script type="module">
-  // ── Imports Transformers.js (Xenova — roda no browser via ONNX) ──
-  import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
-
-  // Permite download direto do HuggingFace no browser
-  env.allowLocalModels = false;
+  // ── Web Worker ──────────────────────────────────────────────────
+  const worker = new Worker('./whisper.worker.js', { type: 'module' });
 
   // ── Estado ──────────────────────────────────────────────────────
-  let transcriber = null;
-  let audioFile   = null;
+  let modelReady    = false;
+  let audioFile     = null;
   let mediaRecorder = null;
   let recordedChunks = [];
   let timerInterval  = null;
@@ -336,7 +387,7 @@
     const t = $('toast');
     t.textContent = msg;
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2400);
+    setTimeout(() => t.classList.remove('show'), 2800);
   }
 
   function showProgress(label, pct) {
@@ -344,62 +395,109 @@
     $('progress-label').textContent = label;
     $('progress-bar').style.width = pct + '%';
   }
-
   function hideProgress() {
     $('progress-wrap').classList.remove('visible');
     $('progress-bar').style.width = '0%';
   }
 
-  function updateBtn() {
-    $('transcribe-btn').disabled = !audioFile || !transcriber;
-  }
-
   function formatBytes(b) {
+    if (!b) return '—';
     if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
     return (b / 1048576).toFixed(1) + ' MB';
   }
 
-  // ── Carregar modelo ─────────────────────────────────────────────
-  window.loadModel = async function() {
-    const model = $('model-select').value;
-    $('load-btn').disabled = true;
-    $('model-select').disabled = true;
-    setStatus('Baixando modelo… (pode demorar na 1ª vez)');
-    $('model-progress-wrap').classList.add('visible');
-    $('model-progress-bar').style.width = '5%';
+  function updateBtn() {
+    $('transcribe-btn').disabled = !audioFile || !modelReady;
+  }
 
-    try {
-      transcriber = await pipeline(
-        'automatic-speech-recognition',
-        model,
-        {
-          progress_callback: (p) => {
-            if (p.status === 'downloading') {
-              const pct = p.total ? Math.round((p.loaded / p.total) * 90) : 50;
-              $('model-progress-bar').style.width = pct + '%';
-              $('model-progress-label').textContent =
-                `Baixando modelo… ${formatBytes(p.loaded || 0)} / ${formatBytes(p.total || 0)}`;
-            }
-            if (p.status === 'loading') {
-              $('model-progress-bar').style.width = '95%';
-              $('model-progress-label').textContent = 'Carregando modelo na memória…';
-            }
-          }
-        }
-      );
+  // ── Chunks log helpers ──────────────────────────────────────────
+  function logChunk(id, label, cls, prefix) {
+    const log = $('chunks-log');
+    log.classList.add('visible');
+    let el = document.getElementById('ck-' + id);
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'ck-' + id;
+      el.className = 'chunk-item';
+      log.appendChild(el);
+    }
+    el.className = 'chunk-item ' + cls;
+    el.textContent = prefix + ' Bloco ' + id + ' [' + label + ']';
+    log.scrollTop = log.scrollHeight;
+  }
+
+  // ── Mensagens do Worker ─────────────────────────────────────────
+  worker.addEventListener('message', (e) => {
+    const d = e.data;
+
+    // Modelo
+    if (d.type === 'model_progress') {
+      if (d.status === 'downloading') {
+        const pct = d.total ? Math.round((d.loaded / d.total) * 90) : 50;
+        $('model-progress-bar').style.width = pct + '%';
+        $('model-progress-label').textContent =
+          `Baixando modelo… ${formatBytes(d.loaded)} / ${formatBytes(d.total)}`;
+      } else if (d.status === 'loading') {
+        $('model-progress-bar').style.width = '95%';
+        $('model-progress-label').textContent = 'Carregando modelo na memória…';
+      }
+    }
+    if (d.type === 'model_ready') {
+      modelReady = true;
       $('model-progress-bar').style.width = '100%';
       $('model-progress-label').textContent = 'Modelo carregado! ✓';
       setTimeout(() => $('model-progress-wrap').classList.remove('visible'), 1800);
       setStatus('Modelo pronto — pode transcrever! ✓', 'ready');
       $('load-btn').textContent = '✓ Carregado';
       updateBtn();
-    } catch (err) {
-      setStatus('Erro ao carregar modelo: ' + err.message, 'error');
+    }
+    if (d.type === 'model_error') {
+      setStatus('Erro ao carregar modelo: ' + d.message, 'error');
       $('model-progress-label').textContent = 'Falha no carregamento.';
       $('load-btn').disabled = false;
       $('load-btn').textContent = 'Tentar novamente';
       $('model-select').disabled = false;
     }
+
+    // Transcrição por blocos
+    if (d.type === 'chunk_start') {
+      logChunk(d.chunk, d.timeLabel, 'processing', '⏳');
+      showProgress(`Transcrevendo bloco ${d.chunk}/${d.total} [${d.timeLabel}]…`, d.pct);
+    }
+    if (d.type === 'chunk_done') {
+      logChunk(d.chunk, d.timeLabel, 'done', '✅');
+      // Mostra parcial em tempo real
+      $('transcript-box').textContent = d.fullText;
+      $('result-card').classList.add('visible');
+      showProgress(`Bloco ${d.chunk}/${d.total} concluído`, d.pct);
+    }
+    if (d.type === 'chunk_error') {
+      logChunk(d.chunk, '?', 'err', '❌');
+    }
+    if (d.type === 'done') {
+      hideProgress();
+      $('bg-notice').classList.remove('visible');
+      $('transcribe-btn').disabled = false;
+      const text = d.text;
+      $('transcript-box').textContent = text;
+      const words = text.trim().split(/\s+/).length;
+      $('word-count').textContent = `${words} palavras · ${text.length} caracteres`;
+      $('result-card').classList.add('visible');
+      $('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setStatus('Transcrição concluída ✓', 'ready');
+      showToast('✅ Transcrição concluída!');
+    }
+  });
+
+  // ── Carregar modelo → envia para Worker ─────────────────────────
+  window.loadModel = function() {
+    const model = $('model-select').value;
+    $('load-btn').disabled = true;
+    $('model-select').disabled = true;
+    setStatus('Baixando modelo… (pode demorar na 1ª vez)');
+    $('model-progress-wrap').classList.add('visible');
+    $('model-progress-bar').style.width = '5%';
+    worker.postMessage({ type: 'load', modelId: model });
   };
 
   // ── Tabs ────────────────────────────────────────────────────────
@@ -487,55 +585,41 @@
     $('timer').classList.remove('visible');
   }
 
-  // ── Transcrição real com Transformers.js ────────────────────────
+  // ── Transcrição → envia PCM para Worker ─────────────────────────
   window.startTranscription = async function() {
-    if (!audioFile || !transcriber) return;
+    if (!audioFile || !modelReady) return;
     $('transcribe-btn').disabled = true;
+    $('chunks-log').innerHTML = '';
+    $('chunks-log').classList.remove('visible');
     $('result-card').classList.remove('visible');
-    showProgress('Lendo arquivo de áudio…', 15);
+    $('bg-notice').classList.add('visible');
+    showProgress('Decodificando áudio…', 10);
 
     try {
-      // Decodifica áudio para Float32Array PCM 16kHz
       const arrayBuffer = await audioFile.arrayBuffer();
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
       const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-      const pcm = audioBuffer.getChannelData(0); // canal mono, 16kHz
+      const pcm = audioBuffer.getChannelData(0); // Float32Array, 16kHz mono
 
-      showProgress('Enviando para o modelo Whisper…', 40);
+      const lang         = $('lang-select').value;
+      const chunkSeconds = parseInt($('chunk-select').value, 10);
 
-      const lang = $('lang-select').value;
+      showProgress('Enviando para processamento em background…', 15);
 
-      const result = await transcriber(pcm, {
-        language: lang,
-        task: 'transcribe',
-        chunk_length_s: 30,       // processa em blocos de 30s (suporte a áudios longos)
-        stride_length_s: 5,
-        return_timestamps: false,
-        callback_function: (beams) => {
-          // Atualiza progresso conforme tokens são gerados
-          showProgress('Transcrevendo… aguarde', 65 + Math.random() * 20);
-        }
-      });
-
-      showProgress('Finalizando…', 98);
-      showResult(result.text.trim());
+      // Transfere PCM para o Worker (zero-copy via Transferable)
+      const pcmCopy = pcm.slice(0); // cópia porque transferimos
+      worker.postMessage(
+        { type: 'transcribe', pcm: pcmCopy, language: lang, chunkSeconds, sampleRate: 16000 },
+        [pcmCopy.buffer]
+      );
     } catch (err) {
       hideProgress();
+      $('bg-notice').classList.remove('visible');
       $('transcribe-btn').disabled = false;
-      showToast('Erro na transcrição: ' + err.message);
+      showToast('Erro ao decodificar áudio: ' + err.message);
       console.error(err);
     }
   };
-
-  function showResult(text) {
-    hideProgress();
-    $('transcribe-btn').disabled = false;
-    $('transcript-box').textContent = text;
-    const words = text.trim().split(/\s+/).length;
-    $('word-count').textContent = `${words} palavras · ${text.length} caracteres`;
-    $('result-card').classList.add('visible');
-    $('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
 
   // ── Ações resultado ─────────────────────────────────────────────
   window.copyText = function() {
@@ -555,9 +639,10 @@
 
   window.clearResult = function() {
     $('result-card').classList.remove('visible');
+    $('chunks-log').innerHTML = '';
+    $('chunks-log').classList.remove('visible');
   };
 
-  // Inicializa
   setStatus('Clique em "Carregar modelo" para começar');
 </script>
 </body>
