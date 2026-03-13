@@ -4,13 +4,14 @@ import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers
 env.allowLocalModels = false;
 
 let transcriber = null;
+let isCancelled = false;
 
-// ── Helpers ────────────────────────────────────────────────────────
 function post(data) { self.postMessage(data); }
 
 // ── Carregar modelo ────────────────────────────────────────────────
 async function loadModel(modelId) {
   post({ type: 'model_progress', status: 'start' });
+  isCancelled = false;
   try {
     transcriber = await pipeline(
       'automatic-speech-recognition',
@@ -31,46 +32,60 @@ async function loadModel(modelId) {
   }
 }
 
-// ── Transcrição em chunks ──────────────────────────────────────────
-async function transcribe({ pcm, language, chunkSeconds, sampleRate }) {
+// ── Transcrição em chunks, libera referências antigas ──────────────
+async function transcribe({ pcm, language, chunkSeconds, overlapSeconds, sampleRate }) {
   if (!transcriber) {
     post({ type: 'error', message: 'Modelo não carregado' });
     return;
   }
 
-  const CHUNK_SIZE = chunkSeconds * sampleRate;   // amostras por bloco
-  const OVERLAP    = 5 * sampleRate;              // 5s de sobreposição entre blocos
-  const STRIDE     = CHUNK_SIZE - OVERLAP;
-  const totalChunks = Math.ceil((pcm.length - OVERLAP) / STRIDE);
+  isCancelled = false;
+  const SR          = sampleRate || 16000;
+  const CHUNK_SIZE  = chunkSeconds * SR;
+  const OVERLAP     = (overlapSeconds || 5) * SR;
+  const STRIDE      = CHUNK_SIZE - OVERLAP;
+  const totalSamples = pcm.length;
+  const totalChunks  = Math.ceil((totalSamples - OVERLAP) / STRIDE);
 
   let fullText = '';
 
   for (let i = 0; i < totalChunks; i++) {
+    if (isCancelled) break;
+
     const start = i * STRIDE;
-    const end   = Math.min(start + CHUNK_SIZE, pcm.length);
+    const end   = Math.min(start + CHUNK_SIZE, totalSamples);
+
+    // Cópia isolada do bloco — permite que o GC colete partes já processadas
     const chunk = pcm.slice(start, end);
 
-    const minuteStart = Math.floor((start / sampleRate) / 60);
-    const secStart    = Math.floor((start / sampleRate) % 60);
-    const minuteEnd   = Math.floor((end   / sampleRate) / 60);
-    const secEnd      = Math.floor((end   / sampleRate) % 60);
-    const timeLabel   = `${String(minuteStart).padStart(2,'0')}:${String(secStart).padStart(2,'0')} → ${String(minuteEnd).padStart(2,'0')}:${String(secEnd).padStart(2,'0')}`;
+    const startSec = start / SR;
+    const endSec   = end   / SR;
+
+    function fmt(sec) {
+      const m = String(Math.floor(sec / 60)).padStart(2,'0');
+      const s = String(Math.floor(sec % 60)).padStart(2,'0');
+      return `${m}:${s}`;
+    }
+    const timeLabel = `${fmt(startSec)} → ${fmt(endSec)}`;
 
     post({
       type: 'chunk_start',
       chunk: i + 1,
       total: totalChunks,
       timeLabel,
+      startSec,
+      endSec,
       pct: Math.round((i / totalChunks) * 90)
     });
 
     try {
-      const result = await transcriber(chunk, {
-        language,
+      const opts = {
         task: 'transcribe',
         return_timestamps: false
-      });
+      };
+      if (language) opts.language = language;
 
+      const result = await transcriber(chunk, opts);
       const text = result.text.trim();
       fullText += (fullText ? ' ' : '') + text;
 
@@ -79,22 +94,29 @@ async function transcribe({ pcm, language, chunkSeconds, sampleRate }) {
         chunk: i + 1,
         total: totalChunks,
         timeLabel,
+        startSec,
+        endSec,
         text,
         fullText,
         pct: Math.round(((i + 1) / totalChunks) * 90)
       });
     } catch (err) {
       post({ type: 'chunk_error', chunk: i + 1, message: err.message });
-      // continua para o próximo bloco mesmo com erro
     }
+
+    // Dica ao GC: solta referência do chunk processado
+    // (o pcm original ainda existe mas o slice já foi usado)
   }
 
-  post({ type: 'done', text: fullText });
+  if (!isCancelled) {
+    post({ type: 'done', text: fullText });
+  }
 }
 
 // ── Listener ───────────────────────────────────────────────────────
 self.addEventListener('message', async (e) => {
   const { type, ...data } = e.data;
-  if (type === 'load')        await loadModel(data.modelId);
-  if (type === 'transcribe')  await transcribe(data);
+  if (type === 'load')       await loadModel(data.modelId);
+  if (type === 'transcribe') await transcribe(data);
+  if (type === 'cancel')     isCancelled = true;
 });

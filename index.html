@@ -4,32 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Whisper Cursos — Transcrição de Treinamentos</title>
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#0f1117" />
   <style>
     :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --card: #22263a;
-      --accent: #7c6af7;
-      --accent2: #5b86e5;
-      --text: #e8eaf6;
-      --subtext: #8b95c4;
-      --success: #4caf88;
-      --error: #e05c7d;
-      --border: #2e3354;
-      --radius: 14px;
+      --bg: #0f1117; --surface: #1a1d27; --card: #22263a;
+      --accent: #7c6af7; --accent2: #5b86e5;
+      --text: #e8eaf6; --subtext: #8b95c4;
+      --success: #4caf88; --error: #e05c7d;
+      --border: #2e3354; --radius: 14px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 16px 60px;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; padding: 24px 16px 80px;
     }
-    header { width: 100%; max-width: 640px; text-align: center; margin-bottom: 28px; }
+    header { width: 100%; max-width: 680px; text-align: center; margin-bottom: 24px; }
     header h1 {
       font-size: 1.9rem; font-weight: 700;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -42,54 +34,73 @@
       display: inline-flex; align-items: center; gap: 7px;
       background: var(--card); border: 1px solid var(--border);
       border-radius: 99px; padding: 6px 14px;
-      font-size: 0.8rem; color: var(--subtext); margin-bottom: 24px;
+      font-size: 0.8rem; color: var(--subtext); margin-bottom: 18px;
     }
     #status-dot {
       width: 8px; height: 8px; border-radius: 50%;
       background: #f5a623; animation: pulse 1.5s infinite;
     }
-    #status-dot.ready  { background: var(--success); animation: none; }
-    #status-dot.error  { background: var(--error);   animation: none; }
+    #status-dot.ready { background: var(--success); animation: none; }
+    #status-dot.error { background: var(--error); animation: none; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* Heavy mode banner */
+    #heavy-banner {
+      display: none; width: 100%; max-width: 680px;
+      background: rgba(245,166,35,.1); border: 1px solid rgba(245,166,35,.35);
+      border-radius: 10px; padding: 11px 16px;
+      font-size: 0.82rem; color: #f5c842; margin-bottom: 12px;
+    }
+    #heavy-banner.visible { display: flex; align-items: flex-start; gap: 9px; }
+
+    /* Error banner */
+    #error-banner {
+      display: none; width: 100%; max-width: 680px;
+      background: rgba(224,92,125,.1); border: 1px solid rgba(224,92,125,.35);
+      border-radius: 10px; padding: 11px 16px;
+      font-size: 0.82rem; color: var(--error); margin-bottom: 12px;
+    }
+    #error-banner.visible { display: flex; align-items: flex-start; gap: 9px; }
 
     #model-row {
       display: flex; align-items: center; gap: 10px;
-      width: 100%; max-width: 640px; margin-bottom: 18px;
+      width: 100%; max-width: 680px; margin-bottom: 14px;
     }
     #model-row label { font-size: 0.82rem; color: var(--subtext); white-space: nowrap; }
     #model-select {
       flex:1; background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); padding: 7px 11px;
-      font-size: 0.84rem; outline: none;
+      border-radius: 8px; color: var(--text); padding: 7px 11px; font-size: 0.84rem; outline: none;
     }
     #load-btn {
       padding: 7px 16px; border: none; border-radius: 8px;
       background: var(--accent); color: #fff;
-      font-size: 0.84rem; font-weight: 600; cursor: pointer;
-      white-space: nowrap; transition: opacity .2s;
+      font-size: 0.84rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity .2s;
     }
     #load-btn:disabled { opacity: .45; cursor: not-allowed; }
 
-    #model-progress-wrap { width: 100%; max-width: 640px; margin-bottom: 16px; display: none; }
+    #model-progress-wrap { width: 100%; max-width: 680px; margin-bottom: 12px; display: none; }
     #model-progress-wrap.visible { display: block; }
     #model-progress-label { font-size: 0.8rem; color: var(--subtext); margin-bottom: 6px; }
     #model-progress-bg { height: 5px; background: var(--card); border-radius: 99px; overflow: hidden; }
     #model-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 99px; transition: width .3s; }
+    #model-cache-badge {
+      display: none; font-size: 0.75rem; color: var(--success);
+      margin-top: 4px;
+    }
+    #model-cache-badge.visible { display: block; }
 
-    /* Chunk settings */
     #chunk-row {
       display: flex; align-items: center; gap: 10px;
-      width: 100%; max-width: 640px; margin-bottom: 18px;
+      width: 100%; max-width: 680px; margin-bottom: 14px;
     }
     #chunk-row label { font-size: 0.82rem; color: var(--subtext); white-space: nowrap; }
     #chunk-select {
       flex:1; background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); padding: 7px 11px;
-      font-size: 0.84rem; outline: none;
+      border-radius: 8px; color: var(--text); padding: 7px 11px; font-size: 0.84rem; outline: none;
     }
 
     .card {
-      width: 100%; max-width: 640px;
+      width: 100%; max-width: 680px;
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 28px 24px; margin-bottom: 20px;
     }
@@ -107,12 +118,10 @@
 
     #drop-zone {
       border: 2px dashed var(--border); border-radius: var(--radius);
-      padding: 44px 20px; text-align: center; cursor: pointer;
+      padding: 40px 20px; text-align: center; cursor: pointer;
       transition: border-color .25s, background .25s;
     }
-    #drop-zone:hover, #drop-zone.drag-over {
-      border-color: var(--accent); background: rgba(124,106,247,.05);
-    }
+    #drop-zone:hover, #drop-zone.drag-over { border-color: var(--accent); background: rgba(124,106,247,.05); }
     #drop-zone svg { margin-bottom: 14px; opacity: .6; }
     #drop-zone p { color: var(--subtext); font-size: 0.9rem; }
     #drop-zone strong { color: var(--text); }
@@ -128,6 +137,19 @@
     #file-name { font-weight: 600; flex:1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #file-size { color: var(--subtext); }
     #remove-file { background: none; border: none; color: var(--error); cursor: pointer; font-size: 1.1rem; padding: 4px; }
+
+    /* extract audio btn */
+    #extract-btn {
+      display: none; width: 100%; margin-top: 12px; padding: 10px;
+      border: 1px solid var(--border); border-radius: 10px;
+      background: var(--card); color: var(--text);
+      font-size: 0.88rem; cursor: pointer; transition: border-color .2s;
+    }
+    #extract-btn.visible { display: block; }
+    #extract-btn:hover { border-color: var(--accent); }
+    #extract-btn:disabled { opacity: .4; cursor: not-allowed; }
+    #extract-progress { display: none; margin-top: 8px; font-size: 0.78rem; color: var(--subtext); }
+    #extract-progress.visible { display: block; }
 
     #rec-btn {
       display: flex; flex-direction: column; align-items: center;
@@ -158,9 +180,9 @@
     }
     select:focus { border-color: var(--accent); }
 
+    #btn-row { display: flex; gap: 10px; margin-top: 20px; }
     #transcribe-btn {
-      width: 100%; margin-top: 20px; padding: 14px; border: none;
-      border-radius: var(--radius);
+      flex: 1; padding: 14px; border: none; border-radius: var(--radius);
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer;
       transition: opacity .2s, transform .1s;
@@ -168,46 +190,74 @@
     #transcribe-btn:hover { opacity: .9; }
     #transcribe-btn:active { transform: scale(.98); }
     #transcribe-btn:disabled { opacity: .45; cursor: not-allowed; }
+    #cancel-btn {
+      display: none; padding: 14px 18px; border: 1px solid var(--error);
+      border-radius: var(--radius); background: transparent;
+      color: var(--error); font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    }
+    #cancel-btn.visible { display: block; }
 
     #progress-wrap { display: none; margin-top: 18px; }
     #progress-wrap.visible { display: block; }
-    #progress-label { font-size: 0.82rem; color: var(--subtext); margin-bottom: 7px; }
+    #progress-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+    #progress-label { font-size: 0.82rem; color: var(--subtext); }
+    #eta-label { font-size: 0.78rem; color: var(--subtext); }
     #progress-bar-bg { height: 6px; background: var(--card); border-radius: 99px; overflow: hidden; }
     #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 99px; transition: width .4s; }
 
-    /* Chunks live log */
     #chunks-log {
       display: none; margin-top: 14px;
       background: var(--card); border-radius: 10px;
-      padding: 10px 14px; max-height: 180px; overflow-y: auto;
+      padding: 10px 14px; max-height: 160px; overflow-y: auto;
       font-size: 0.78rem; line-height: 1.7; color: var(--subtext);
     }
     #chunks-log.visible { display: block; }
-    #chunks-log .chunk-item { margin-bottom: 4px; }
-    #chunks-log .chunk-item.done { color: var(--success); }
-    #chunks-log .chunk-item.processing { color: var(--accent); animation: pulse 1s infinite; }
-    #chunks-log .chunk-item.err { color: var(--error); }
+    .chunk-item.done { color: var(--success); }
+    .chunk-item.processing { color: var(--accent); animation: pulse 1s infinite; }
+    .chunk-item.err { color: var(--error); }
 
-    /* Background notice */
     #bg-notice {
-      display: none;
-      width: 100%; max-width: 640px;
+      display: none; width: 100%; max-width: 680px;
       background: rgba(76,175,136,.1); border: 1px solid rgba(76,175,136,.3);
       border-radius: 10px; padding: 11px 16px;
-      font-size: 0.82rem; color: #6dcfaa;
-      margin-bottom: 14px;
+      font-size: 0.82rem; color: #6dcfaa; margin-bottom: 14px;
     }
     #bg-notice.visible { display: flex; align-items: center; gap: 9px; }
 
+    /* Sessions history */
+    #sessions-section {
+      width: 100%; max-width: 680px; margin-bottom: 20px;
+    }
+    #sessions-section h3 {
+      font-size: 0.9rem; color: var(--subtext); margin-bottom: 10px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    #clear-sessions-btn {
+      background: none; border: none; color: var(--error);
+      font-size: 0.78rem; cursor: pointer;
+    }
+    .session-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px; margin-bottom: 8px;
+      cursor: pointer; transition: border-color .2s;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .session-item:hover { border-color: var(--accent); }
+    .session-meta { flex:1; }
+    .session-name { font-size: 0.88rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 350px; }
+    .session-date { font-size: 0.75rem; color: var(--subtext); margin-top: 2px; }
+    .session-del { background: none; border: none; color: var(--error); cursor: pointer; font-size: 1rem; padding: 4px; }
+
+    /* Result */
     #result-card {
-      display: none; width: 100%; max-width: 640px;
+      display: none; width: 100%; max-width: 680px;
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 24px;
     }
     #result-card.visible { display: block; }
-    .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
     .result-header h2 { font-size: 1rem; font-weight: 700; }
-    .result-actions { display: flex; gap: 8px; }
+    .result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
     .action-btn {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 8px; color: var(--text); padding: 6px 13px;
@@ -217,9 +267,11 @@
     #transcript-box {
       background: var(--card); border-radius: 10px; padding: 16px;
       font-size: 0.9rem; line-height: 1.7; color: var(--text);
-      max-height: 400px; overflow-y: auto;
+      max-height: 420px; overflow-y: auto;
       white-space: pre-wrap; word-break: break-word;
+      outline: none; min-height: 80px;
     }
+    #transcript-box[contenteditable="true"] { border: 1px solid var(--accent); }
     #word-count { margin-top: 10px; font-size: 0.78rem; color: var(--subtext); text-align: right; }
 
     #toast {
@@ -252,7 +304,14 @@
   <span id="status-text">Aguardando carregamento do modelo…</span>
 </div>
 
-<!-- Background processing notice -->
+<!-- Banners -->
+<div id="heavy-banner">
+  <span>⚠️</span>
+  <div>
+    <strong>Modo pesado ativado</strong> — Arquivo grande detectado. Usando modelo menor e blocos de 10 min para não estourar memória. Evite fechar o app durante a transcrição.
+  </div>
+</div>
+<div id="error-banner"><span>❌</span><span id="error-text"></span></div>
 <div id="bg-notice">
   <span>🔄</span>
   <span>Processando em segundo plano — pode trocar de app, a transcrição continua!</span>
@@ -269,9 +328,9 @@
   </select>
   <button id="load-btn" onclick="loadModel()">Carregar modelo</button>
 </div>
-
+<div id="model-cache-badge">✓ Modelo em cache local — carregamento rápido</div>
 <div id="model-progress-wrap">
-  <div id="model-progress-label">Baixando modelo… (apenas no primeiro uso)</div>
+  <div id="model-progress-label">Baixando modelo…</div>
   <div id="model-progress-bg"><div id="model-progress-bar"></div></div>
 </div>
 
@@ -288,8 +347,8 @@
 
 <div class="card">
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('upload')">📁 Upload de Arquivo</button>
-    <button class="tab" onclick="switchTab('mic')">🎤 Gravar Agora</button>
+    <button class="tab active" onclick="switchTab('upload')">📁 Upload</button>
+    <button class="tab" onclick="switchTab('mic')">🎤 Gravar</button>
   </div>
 
   <div id="panel-upload" class="panel active">
@@ -299,7 +358,7 @@
         <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" stroke="#5b86e5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <p><strong>Clique ou arraste um arquivo aqui</strong></p>
-      <p style="margin-top:6px;font-size:.8rem">MP3, MP4, WAV, M4A, OGG, WEBM</p>
+      <p style="margin-top:6px;font-size:.8rem">MP3, MP4, WAV, M4A, OGG, WEBM, MOV</p>
     </div>
     <input type="file" id="file-input" accept="audio/*,video/*" />
     <div id="file-info">
@@ -308,6 +367,9 @@
       <span id="file-size">—</span>
       <button id="remove-file" title="Remover">✕</button>
     </div>
+    <!-- Extract audio from video -->
+    <button id="extract-btn" onclick="extractAudio()" disabled>🎬 Extrair áudio do vídeo (ffmpeg)</button>
+    <div id="extract-progress"></div>
   </div>
 
   <div id="panel-mic" class="panel">
@@ -326,31 +388,46 @@
       <option value="spanish">🇪🇸 Espanhol</option>
       <option value="french">🇫🇷 Francês</option>
       <option value="german">🇩🇪 Alemão</option>
+      <option value="auto">🌐 Auto-detectar</option>
     </select>
   </div>
 
-  <button id="transcribe-btn" onclick="startTranscription()" disabled>Transcrever</button>
+  <div id="btn-row">
+    <button id="transcribe-btn" onclick="startTranscription()" disabled>Transcrever</button>
+    <button id="cancel-btn" onclick="cancelTranscription()">✕ Cancelar</button>
+  </div>
 
   <div id="progress-wrap">
-    <div id="progress-label">Processando…</div>
+    <div id="progress-top">
+      <span id="progress-label">Processando…</span>
+      <span id="eta-label"></span>
+    </div>
     <div id="progress-bar-bg"><div id="progress-bar"></div></div>
   </div>
 
-  <!-- Log de blocos em tempo real -->
   <div id="chunks-log"></div>
 
   <div class="info-box">
     <strong>ℹ️ Roda em segundo plano</strong>
-    O processamento usa Web Worker — pode trocar de app, minimizar o browser ou mudar de aba. A transcrição continua e você recebe o resultado quando voltar.
+    Web Worker — pode trocar de app ou minimizar. Para arquivos muito grandes, mantenha a tela ligada para garantir que o Android não suspenda o processamento.
   </div>
 </div>
 
+<!-- Histórico de sessões -->
+<div id="sessions-section" style="display:none">
+  <h3>📂 Transcrições salvas <button id="clear-sessions-btn" onclick="clearAllSessions()">Limpar tudo</button></h3>
+  <div id="sessions-list"></div>
+</div>
+
+<!-- Resultado -->
 <div id="result-card">
   <div class="result-header">
     <h2>📝 Transcrição</h2>
     <div class="result-actions">
+      <button class="action-btn" onclick="toggleEdit()">✏️ Editar</button>
       <button class="action-btn" onclick="copyText()">📋 Copiar</button>
       <button class="action-btn" onclick="downloadTxt()">⬇️ .TXT</button>
+      <button class="action-btn" onclick="downloadSrt()">⬇️ .SRT</button>
       <button class="action-btn" onclick="clearResult()">🗑️ Limpar</button>
     </div>
   </div>
@@ -361,289 +438,616 @@
 <div id="toast"></div>
 
 <script type="module">
-  // ── Web Worker ──────────────────────────────────────────────────
-  const worker = new Worker('./whisper.worker.js', { type: 'module' });
+import { openDB } from 'https://cdn.jsdelivr.net/npm/idb@8/+esm';
 
-  // ── Estado ──────────────────────────────────────────────────────
-  let modelReady    = false;
-  let audioFile     = null;
-  let mediaRecorder = null;
-  let recordedChunks = [];
-  let timerInterval  = null;
-  let seconds = 0;
-
-  // ── Helpers UI ──────────────────────────────────────────────────
-  const $ = id => document.getElementById(id);
-
-  function setStatus(text, state = 'loading') {
-    $('status-text').textContent = text;
-    const dot = $('status-dot');
-    dot.className = '';
-    if (state === 'ready') dot.classList.add('ready');
-    if (state === 'error') dot.classList.add('error');
+// ── DB (IndexedDB para cache de sessões) ───────────────────────────
+const db = await openDB('whisper-cursos', 1, {
+  upgrade(db) {
+    db.createObjectStore('sessions', { keyPath: 'id', autoIncrement: true });
   }
+});
 
-  function showToast(msg) {
-    const t = $('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2800);
+// ── Web Worker ─────────────────────────────────────────────────────
+let worker = newWorker();
+function newWorker() {
+  return new Worker('./whisper.worker.js', { type: 'module' });
+}
+
+// ── Estado ─────────────────────────────────────────────────────────
+let modelReady    = false;
+let audioFile     = null;
+let isVideoFile   = false;
+let mediaRecorder = null;
+let recordedChunks = [];
+let timerInterval  = null;
+let seconds = 0;
+let cancelled = false;
+let chunkTimestamps = []; // para SRT
+let chunkStartTimes = [];
+let chunkEndTimes   = [];
+let chunkTexts      = [];
+let transcriptionStartTime = 0;
+let chunksCompleted = 0;
+let totalChunks = 0;
+
+// ── Helpers UI ─────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+
+function setStatus(text, state = 'loading') {
+  $('status-text').textContent = text;
+  const dot = $('status-dot');
+  dot.className = '';
+  if (state === 'ready') dot.classList.add('ready');
+  if (state === 'error') dot.classList.add('error');
+}
+
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function showProgress(label, pct) {
+  $('progress-wrap').classList.add('visible');
+  $('progress-label').textContent = label;
+  $('progress-bar').style.width = pct + '%';
+}
+function hideProgress() {
+  $('progress-wrap').classList.remove('visible');
+  $('progress-bar').style.width = '0%';
+  $('eta-label').textContent = '';
+}
+
+function formatBytes(b) {
+  if (!b) return '—';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+
+function updateBtn() {
+  $('transcribe-btn').disabled = !audioFile || !modelReady;
+}
+
+function showError(msg) {
+  $('error-text').textContent = msg;
+  $('error-banner').classList.add('visible');
+}
+function hideError() {
+  $('error-banner').classList.remove('visible');
+}
+
+// ── Chunks log ─────────────────────────────────────────────────────
+function logChunk(id, label, cls, prefix) {
+  const log = $('chunks-log');
+  log.classList.add('visible');
+  let el = document.getElementById('ck-' + id);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'ck-' + id;
+    el.className = 'chunk-item';
+    log.appendChild(el);
   }
+  el.className = 'chunk-item ' + cls;
+  el.textContent = prefix + ' Bloco ' + id + ' [' + label + ']';
+  log.scrollTop = log.scrollHeight;
+}
 
-  function showProgress(label, pct) {
-    $('progress-wrap').classList.add('visible');
-    $('progress-label').textContent = label;
-    $('progress-bar').style.width = pct + '%';
+// ── ETA ────────────────────────────────────────────────────────────
+function updateEta(chunkIdx, total) {
+  if (chunkIdx < 1) return;
+  const elapsed = (Date.now() - transcriptionStartTime) / 1000;
+  const avgPerChunk = elapsed / chunkIdx;
+  const remaining = (total - chunkIdx) * avgPerChunk;
+  const m = Math.floor(remaining / 60);
+  const s = Math.floor(remaining % 60);
+  $('eta-label').textContent = remaining > 5
+    ? `~${m > 0 ? m + ' min ' : ''}${s} s restantes`
+    : 'Quase pronto…';
+}
+
+// ── Detecção de arquivo pesado ──────────────────────────────────────
+const HEAVY_SIZE_BYTES = 300 * 1024 * 1024; // 300 MB
+const HEAVY_DURATION_EST_SECONDS = 3 * 3600; // 3h estimada
+const REFUSE_SIZE_BYTES = 1.8 * 1024 * 1024 * 1024; // 1.8 GB — recusa total
+
+function detectHeavyMode(file) {
+  const sz = file.size;
+  if (sz > REFUSE_SIZE_BYTES) return 'refuse';
+  if (sz > HEAVY_SIZE_BYTES)  return 'heavy';
+  return 'normal';
+}
+
+// ── Mensagens do Worker ─────────────────────────────────────────────
+worker.addEventListener('message', handleWorkerMessage);
+
+function handleWorkerMessage(e) {
+  const d = e.data;
+
+  if (d.type === 'model_progress') {
+    if (d.status === 'downloading') {
+      const pct = d.total ? Math.round((d.loaded / d.total) * 90) : 50;
+      $('model-progress-bar').style.width = pct + '%';
+      $('model-progress-label').textContent =
+        `Baixando modelo… ${formatBytes(d.loaded)} / ${formatBytes(d.total)}`;
+    } else if (d.status === 'loading') {
+      $('model-progress-bar').style.width = '95%';
+      $('model-progress-label').textContent = 'Carregando modelo na memória…';
+    }
   }
-  function hideProgress() {
-    $('progress-wrap').classList.remove('visible');
-    $('progress-bar').style.width = '0%';
-  }
-
-  function formatBytes(b) {
-    if (!b) return '—';
-    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
-    return (b / 1048576).toFixed(1) + ' MB';
-  }
-
-  function updateBtn() {
-    $('transcribe-btn').disabled = !audioFile || !modelReady;
-  }
-
-  // ── Chunks log helpers ──────────────────────────────────────────
-  function logChunk(id, label, cls, prefix) {
-    const log = $('chunks-log');
-    log.classList.add('visible');
-    let el = document.getElementById('ck-' + id);
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'ck-' + id;
-      el.className = 'chunk-item';
-      log.appendChild(el);
-    }
-    el.className = 'chunk-item ' + cls;
-    el.textContent = prefix + ' Bloco ' + id + ' [' + label + ']';
-    log.scrollTop = log.scrollHeight;
-  }
-
-  // ── Mensagens do Worker ─────────────────────────────────────────
-  worker.addEventListener('message', (e) => {
-    const d = e.data;
-
-    // Modelo
-    if (d.type === 'model_progress') {
-      if (d.status === 'downloading') {
-        const pct = d.total ? Math.round((d.loaded / d.total) * 90) : 50;
-        $('model-progress-bar').style.width = pct + '%';
-        $('model-progress-label').textContent =
-          `Baixando modelo… ${formatBytes(d.loaded)} / ${formatBytes(d.total)}`;
-      } else if (d.status === 'loading') {
-        $('model-progress-bar').style.width = '95%';
-        $('model-progress-label').textContent = 'Carregando modelo na memória…';
-      }
-    }
-    if (d.type === 'model_ready') {
-      modelReady = true;
-      $('model-progress-bar').style.width = '100%';
-      $('model-progress-label').textContent = 'Modelo carregado! ✓';
-      setTimeout(() => $('model-progress-wrap').classList.remove('visible'), 1800);
-      setStatus('Modelo pronto — pode transcrever! ✓', 'ready');
-      $('load-btn').textContent = '✓ Carregado';
-      updateBtn();
-    }
-    if (d.type === 'model_error') {
-      setStatus('Erro ao carregar modelo: ' + d.message, 'error');
-      $('model-progress-label').textContent = 'Falha no carregamento.';
-      $('load-btn').disabled = false;
-      $('load-btn').textContent = 'Tentar novamente';
-      $('model-select').disabled = false;
-    }
-
-    // Transcrição por blocos
-    if (d.type === 'chunk_start') {
-      logChunk(d.chunk, d.timeLabel, 'processing', '⏳');
-      showProgress(`Transcrevendo bloco ${d.chunk}/${d.total} [${d.timeLabel}]…`, d.pct);
-    }
-    if (d.type === 'chunk_done') {
-      logChunk(d.chunk, d.timeLabel, 'done', '✅');
-      // Mostra parcial em tempo real
-      $('transcript-box').textContent = d.fullText;
-      $('result-card').classList.add('visible');
-      showProgress(`Bloco ${d.chunk}/${d.total} concluído`, d.pct);
-    }
-    if (d.type === 'chunk_error') {
-      logChunk(d.chunk, '?', 'err', '❌');
-    }
-    if (d.type === 'done') {
-      hideProgress();
-      $('bg-notice').classList.remove('visible');
-      $('transcribe-btn').disabled = false;
-      const text = d.text;
-      $('transcript-box').textContent = text;
-      const words = text.trim().split(/\s+/).length;
-      $('word-count').textContent = `${words} palavras · ${text.length} caracteres`;
-      $('result-card').classList.add('visible');
-      $('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setStatus('Transcrição concluída ✓', 'ready');
-      showToast('✅ Transcrição concluída!');
-    }
-  });
-
-  // ── Carregar modelo → envia para Worker ─────────────────────────
-  window.loadModel = function() {
-    const model = $('model-select').value;
-    $('load-btn').disabled = true;
-    $('model-select').disabled = true;
-    setStatus('Baixando modelo… (pode demorar na 1ª vez)');
-    $('model-progress-wrap').classList.add('visible');
-    $('model-progress-bar').style.width = '5%';
-    worker.postMessage({ type: 'load', modelId: model });
-  };
-
-  // ── Tabs ────────────────────────────────────────────────────────
-  window.switchTab = function(tab) {
-    document.querySelectorAll('.tab').forEach((t, i) => {
-      t.classList.toggle('active', (i===0&&tab==='upload')||(i===1&&tab==='mic'));
-    });
-    $('panel-upload').classList.toggle('active', tab==='upload');
-    $('panel-mic').classList.toggle('active', tab==='mic');
-  };
-
-  // ── Drag & Drop / Upload ────────────────────────────────────────
-  const dz = $('drop-zone');
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-  dz.addEventListener('drop', e => {
-    e.preventDefault(); dz.classList.remove('drag-over');
-    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
-  });
-  $('file-input').addEventListener('change', e => {
-    if (e.target.files[0]) setFile(e.target.files[0]);
-  });
-
-  function setFile(f) {
-    audioFile = f;
-    const ext = f.name.split('.').pop().toLowerCase();
-    const icons = { mp3:'🎵', mp4:'🎬', wav:'🎵', m4a:'🎵', ogg:'🎵', webm:'🎬' };
-    $('file-icon').textContent = icons[ext] || '📄';
-    $('file-name').textContent = f.name;
-    $('file-size').textContent = formatBytes(f.size);
-    $('file-info').classList.add('visible');
+  if (d.type === 'model_ready') {
+    modelReady = true;
+    $('model-progress-bar').style.width = '100%';
+    $('model-progress-label').textContent = 'Modelo carregado! ✓';
+    setTimeout(() => $('model-progress-wrap').classList.remove('visible'), 1800);
+    setStatus('Modelo pronto — pode transcrever! ✓', 'ready');
+    $('load-btn').textContent = '✓ Carregado';
+    markModelCached($('model-select').value);
     updateBtn();
   }
+  if (d.type === 'model_error') {
+    setStatus('Erro ao carregar modelo: ' + d.message, 'error');
+    $('model-progress-label').textContent = 'Falha no carregamento.';
+    $('load-btn').disabled = false;
+    $('load-btn').textContent = 'Tentar novamente';
+    $('model-select').disabled = false;
+  }
 
-  $('remove-file').onclick = e => {
-    e.stopPropagation();
+  if (d.type === 'chunk_start') {
+    totalChunks = d.total;
+    logChunk(d.chunk, d.timeLabel, 'processing', '⏳');
+    showProgress(`Transcrevendo bloco ${d.chunk}/${d.total} [${d.timeLabel}]…`, d.pct);
+    updateEta(chunksCompleted, d.total);
+    // Guardar timestamps para SRT
+    chunkStartTimes[d.chunk - 1] = d.startSec;
+    chunkEndTimes[d.chunk - 1]   = d.endSec;
+  }
+  if (d.type === 'chunk_done') {
+    chunksCompleted++;
+    logChunk(d.chunk, d.timeLabel, 'done', '✅');
+    chunkTexts[d.chunk - 1] = d.text;
+    $('transcript-box').textContent = d.fullText;
+    $('result-card').classList.add('visible');
+    showProgress(`Bloco ${d.chunk}/${d.total} concluído`, d.pct);
+    updateEta(chunksCompleted, d.total);
+    // Auto-save parcial
+    autoSaveSession(d.fullText, false);
+  }
+  if (d.type === 'chunk_error') {
+    logChunk(d.chunk, '?', 'err', '❌');
+  }
+  if (d.type === 'done') {
+    if (cancelled) return;
+    hideProgress();
+    $('bg-notice').classList.remove('visible');
+    $('cancel-btn').classList.remove('visible');
+    $('transcribe-btn').disabled = false;
+    const text = d.text;
+    $('transcript-box').textContent = text;
+    const words = text.trim().split(/\s+/).length;
+    $('word-count').textContent = `${words} palavras · ${text.length} caracteres`;
+    $('result-card').classList.add('visible');
+    $('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setStatus('Transcrição concluída ✓', 'ready');
+    showToast('✅ Transcrição concluída!');
+    autoSaveSession(text, true);
+    sendNotification('✅ Transcrição concluída!', 'Abra o app para ver o resultado.');
+  }
+}
+
+// ── Cache de modelo (localStorage flag) ────────────────────────────
+function markModelCached(modelId) {
+  const cached = JSON.parse(localStorage.getItem('cachedModels') || '[]');
+  if (!cached.includes(modelId)) { cached.push(modelId); localStorage.setItem('cachedModels', JSON.stringify(cached)); }
+  $('model-cache-badge').classList.add('visible');
+}
+function checkModelCache(modelId) {
+  const cached = JSON.parse(localStorage.getItem('cachedModels') || '[]');
+  if (cached.includes(modelId)) {
+    $('model-cache-badge').classList.add('visible');
+  } else {
+    $('model-cache-badge').classList.remove('visible');
+  }
+}
+$('model-select').addEventListener('change', () => checkModelCache($('model-select').value));
+checkModelCache($('model-select').value);
+
+// ── Sessões (IndexedDB) ────────────────────────────────────────────
+let currentSessionId = null;
+
+async function autoSaveSession(text, completed) {
+  const name = audioFile ? audioFile.name : 'Gravação';
+  if (currentSessionId) {
+    await db.put('sessions', { id: currentSessionId, name, text, completed, date: new Date().toISOString() });
+  } else {
+    currentSessionId = await db.add('sessions', { name, text, completed, date: new Date().toISOString() });
+  }
+  renderSessions();
+}
+
+async function renderSessions() {
+  const all = await db.getAll('sessions');
+  if (!all.length) { $('sessions-section').style.display = 'none'; return; }
+  $('sessions-section').style.display = 'block';
+  $('sessions-list').innerHTML = '';
+  [...all].reverse().forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'session-item';
+    const preview = s.text ? s.text.slice(0, 80) + '…' : '(sem texto)';
+    div.innerHTML = `
+      <div class="session-meta">
+        <div class="session-name">${s.completed ? '✅' : '⏳'} ${escHtml(s.name)}</div>
+        <div class="session-date">${new Date(s.date).toLocaleString('pt-BR')} — ${escHtml(preview)}</div>
+      </div>
+      <button class="session-del" onclick="deleteSession(${s.id}, event)" title="Excluir">🗑️</button>
+    `;
+    div.addEventListener('click', (e) => { if (e.target.closest('.session-del')) return; loadSession(s); });
+    $('sessions-list').appendChild(div);
+  });
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+window.deleteSession = async function(id, e) {
+  e.stopPropagation();
+  await db.delete('sessions', id);
+  renderSessions();
+};
+
+function loadSession(s) {
+  $('transcript-box').textContent = s.text;
+  const words = s.text.trim().split(/\s+/).length;
+  $('word-count').textContent = `${words} palavras · ${s.text.length} caracteres (sessão salva)`;
+  $('result-card').classList.add('visible');
+  $('result-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+window.clearAllSessions = async function() {
+  if (!confirm('Apagar todas as transcrições salvas?')) return;
+  const all = await db.getAll('sessions');
+  for (const s of all) await db.delete('sessions', s.id);
+  renderSessions();
+};
+
+renderSessions();
+
+// ── Notificações ───────────────────────────────────────────────────
+async function requestNotifPerm() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+}
+function sendNotification(title, body) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, { body, icon: './icon-192.png' });
+  }
+}
+
+// ── Carregar modelo ────────────────────────────────────────────────
+window.loadModel = function() {
+  const model = $('model-select').value;
+  $('load-btn').disabled = true;
+  $('model-select').disabled = true;
+  setStatus('Baixando modelo… (pode demorar na 1ª vez)');
+  $('model-progress-wrap').classList.add('visible');
+  $('model-progress-bar').style.width = '5%';
+  worker.postMessage({ type: 'load', modelId: model });
+  requestNotifPerm();
+};
+
+// ── Tabs ───────────────────────────────────────────────────────────
+window.switchTab = function(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (i===0&&tab==='upload')||(i===1&&tab==='mic'));
+  });
+  $('panel-upload').classList.toggle('active', tab==='upload');
+  $('panel-mic').classList.toggle('active', tab==='mic');
+};
+
+// ── Arquivo ────────────────────────────────────────────────────────
+const dz = $('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+});
+$('file-input').addEventListener('change', e => { if (e.target.files[0]) setFile(e.target.files[0]); });
+
+function isVideo(f) {
+  return f.type.startsWith('video/') || /\.(mp4|mov|mkv|avi|webm)$/i.test(f.name);
+}
+
+function setFile(f) {
+  audioFile = f;
+  isVideoFile = isVideo(f);
+  hideError();
+  $('heavy-banner').classList.remove('visible');
+
+  const ext = f.name.split('.').pop().toLowerCase();
+  const icons = { mp3:'🎵', mp4:'🎬', wav:'🎵', m4a:'🎵', ogg:'🎵', webm:'🎬', mov:'🎬', mkv:'🎬', avi:'🎬' };
+  $('file-icon').textContent = icons[ext] || '📄';
+  $('file-name').textContent = f.name;
+  $('file-size').textContent = formatBytes(f.size);
+  $('file-info').classList.add('visible');
+
+  // Mostrar botão extrair apenas para vídeos
+  if (isVideoFile) {
+    $('extract-btn').classList.add('visible');
+    $('extract-btn').disabled = false;
+    $('extract-btn').textContent = '🎬 Extrair áudio do vídeo (ffmpeg)';
+    $('extract-progress').classList.remove('visible');
+  } else {
+    $('extract-btn').classList.remove('visible');
+  }
+
+  // Detecção modo pesado
+  const mode = detectHeavyMode(f);
+  if (mode === 'refuse') {
+    showError(`Arquivo muito grande (${formatBytes(f.size)}). Exporte apenas o áudio (MP3/M4A) ou divida em partes antes de enviar.`);
     audioFile = null;
-    $('file-info').classList.remove('visible');
-    $('file-input').value = '';
     updateBtn();
-  };
-
-  // ── Gravação ────────────────────────────────────────────────────
-  window.toggleRecording = async function() {
-    const btn = $('rec-btn');
-    if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        recordedChunks = [];
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-          const name = 'gravacao_' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.webm';
-          setFile(new File([blob], name, { type: 'audio/webm' }));
-          stream.getTracks().forEach(t => t.stop());
-        };
-        mediaRecorder.start();
-        btn.classList.add('recording');
-        $('rec-icon').textContent = '⏹️';
-        $('rec-label').textContent = 'Gravando… toque para parar';
-        startTimer();
-      } catch { alert('Permissão para microfone negada ou indisponível.'); }
-    } else {
-      mediaRecorder.stop();
-      btn.classList.remove('recording');
-      $('rec-icon').textContent = '🎙️';
-      $('rec-label').textContent = 'Toque para gravar';
-      stopTimer();
-      window.switchTab('upload');
+    return;
+  }
+  if (mode === 'heavy') {
+    $('heavy-banner').classList.add('visible');
+    // Forçar configurações seguras
+    $('chunk-select').value = '600';
+    const modelVal = $('model-select').value;
+    if (modelVal === 'Xenova/whisper-medium' || modelVal === 'Xenova/whisper-small') {
+      $('model-select').value = 'Xenova/whisper-base';
     }
-  };
-
-  function startTimer() {
-    seconds = 0;
-    const el = $('timer');
-    el.classList.add('visible');
-    timerInterval = setInterval(() => {
-      seconds++;
-      el.textContent = String(Math.floor(seconds/60)).padStart(2,'0') + ':' + String(seconds%60).padStart(2,'0');
-    }, 1000);
-  }
-  function stopTimer() {
-    clearInterval(timerInterval);
-    $('timer').classList.remove('visible');
   }
 
-  // ── Transcrição → envia PCM para Worker ─────────────────────────
-  window.startTranscription = async function() {
-    if (!audioFile || !modelReady) return;
-    $('transcribe-btn').disabled = true;
-    $('chunks-log').innerHTML = '';
-    $('chunks-log').classList.remove('visible');
-    $('result-card').classList.remove('visible');
-    $('bg-notice').classList.add('visible');
-    showProgress('Decodificando áudio…', 10);
+  updateBtn();
+}
 
+$('remove-file').onclick = e => {
+  e.stopPropagation();
+  audioFile = null;
+  isVideoFile = false;
+  $('file-info').classList.remove('visible');
+  $('file-input').value = '';
+  $('extract-btn').classList.remove('visible');
+  $('extract-progress').classList.remove('visible');
+  $('heavy-banner').classList.remove('visible');
+  hideError();
+  updateBtn();
+};
+
+// ── Extrair áudio com ffmpeg.wasm ──────────────────────────────────
+window.extractAudio = async function() {
+  if (!audioFile) return;
+  const btn = $('extract-btn');
+  const prog = $('extract-progress');
+  btn.disabled = true;
+  btn.textContent = '⏳ Carregando ffmpeg…';
+  prog.classList.add('visible');
+  prog.textContent = 'Carregando ffmpeg.wasm (apenas uma vez)…';
+
+  try {
+    // Importação dinâmica sob demanda
+    const { FFmpeg } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm');
+    const { fetchFile, toBlobURL } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm');
+
+    const ffmpeg = new FFmpeg();
+    ffmpeg.on('log', ({ message }) => {
+      prog.textContent = message.slice(0, 120);
+    });
+    ffmpeg.on('progress', ({ progress }) => {
+      const pct = Math.round(progress * 100);
+      prog.textContent = `Convertendo… ${pct}%`;
+    });
+
+    const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm';
+    await ffmpeg.load({
+      coreURL:   await toBlobURL(`${baseURL}/ffmpeg-core.js`,   'text/javascript'),
+      wasmURL:   await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm')
+    });
+
+    btn.textContent = '⏳ Extraindo áudio…';
+    prog.textContent = 'Lendo arquivo…';
+    await ffmpeg.writeFile('input', await fetchFile(audioFile));
+    // Extrair como OGG mono 16kHz (mínimo de RAM, ideal para Whisper)
+    await ffmpeg.exec(['-i', 'input', '-vn', '-ac', '1', '-ar', '16000', '-q:a', '4', 'output.ogg']);
+    const data = await ffmpeg.readFile('output.ogg');
+    const blob = new Blob([data.buffer], { type: 'audio/ogg' });
+    const name = audioFile.name.replace(/\.[^.]+$/, '') + '_audio.ogg';
+    const extracted = new File([blob], name, { type: 'audio/ogg' });
+
+    // Limpar ffmpeg da memória
+    await ffmpeg.deleteFile('input');
+    await ffmpeg.deleteFile('output.ogg');
+
+    prog.textContent = `✅ Áudio extraído: ${formatBytes(extracted.size)}`;
+    btn.textContent = '✅ Áudio extraído!';
+    // Substituir arquivo atual pelo áudio extraído
+    setFile(extracted);
+    isVideoFile = false;
+    $('extract-btn').classList.remove('visible');
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = '🎬 Extrair áudio do vídeo (ffmpeg)';
+    prog.textContent = '❌ Erro: ' + err.message;
+    showError('Falha ao extrair áudio: ' + err.message);
+  }
+};
+
+// ── Gravação ───────────────────────────────────────────────────────
+window.toggleRecording = async function() {
+  const btn = $('rec-btn');
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') {
     try {
-      const arrayBuffer = await audioFile.arrayBuffer();
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
-      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-      const pcm = audioBuffer.getChannelData(0); // Float32Array, 16kHz mono
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+        const name = 'gravacao_' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.webm';
+        setFile(new File([blob], name, { type: 'audio/webm' }));
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mediaRecorder.start();
+      btn.classList.add('recording');
+      $('rec-icon').textContent = '⏹️';
+      $('rec-label').textContent = 'Gravando… toque para parar';
+      startTimer();
+    } catch { alert('Permissão para microfone negada ou indisponível.'); }
+  } else {
+    mediaRecorder.stop();
+    btn.classList.remove('recording');
+    $('rec-icon').textContent = '🎙️';
+    $('rec-label').textContent = 'Toque para gravar';
+    stopTimer();
+    window.switchTab('upload');
+  }
+};
 
-      const lang         = $('lang-select').value;
-      const chunkSeconds = parseInt($('chunk-select').value, 10);
+function startTimer() {
+  seconds = 0;
+  const el = $('timer');
+  el.classList.add('visible');
+  timerInterval = setInterval(() => {
+    seconds++;
+    el.textContent = String(Math.floor(seconds/60)).padStart(2,'0') + ':' + String(seconds%60).padStart(2,'0');
+  }, 1000);
+}
+function stopTimer() {
+  clearInterval(timerInterval);
+  $('timer').classList.remove('visible');
+}
 
-      showProgress('Enviando para processamento em background…', 15);
+// ── Transcrição ────────────────────────────────────────────────────
+window.startTranscription = async function() {
+  if (!audioFile || !modelReady) return;
+  if (isVideoFile) {
+    showError('Este arquivo é um vídeo. Use o botão "Extrair áudio" primeiro para melhor consistência.');
+    return;
+  }
 
-      // Transfere PCM para o Worker (zero-copy via Transferable)
-      const pcmCopy = pcm.slice(0); // cópia porque transferimos
-      worker.postMessage(
-        { type: 'transcribe', pcm: pcmCopy, language: lang, chunkSeconds, sampleRate: 16000 },
-        [pcmCopy.buffer]
-      );
-    } catch (err) {
-      hideProgress();
-      $('bg-notice').classList.remove('visible');
-      $('transcribe-btn').disabled = false;
-      showToast('Erro ao decodificar áudio: ' + err.message);
-      console.error(err);
-    }
-  };
+  cancelled = false;
+  chunksCompleted = 0;
+  chunkTexts = [];
+  chunkStartTimes = [];
+  chunkEndTimes = [];
+  currentSessionId = null;
+  transcriptionStartTime = Date.now();
+  hideError();
 
-  // ── Ações resultado ─────────────────────────────────────────────
-  window.copyText = function() {
-    const txt = $('transcript-box').textContent;
-    navigator.clipboard.writeText(txt)
-      .then(() => showToast('Copiado! ✓'))
-      .catch(() => showToast('Erro ao copiar'));
-  };
+  $('transcribe-btn').disabled = true;
+  $('cancel-btn').classList.add('visible');
+  $('chunks-log').innerHTML = '';
+  $('chunks-log').classList.remove('visible');
+  $('result-card').classList.remove('visible');
+  $('bg-notice').classList.add('visible');
+  showProgress('Decodificando áudio…', 10);
 
-  window.downloadTxt = function() {
-    const txt = $('transcript-box').textContent;
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
-    a.download = 'transcricao_' + new Date().toISOString().slice(0,10) + '.txt';
-    a.click();
-  };
+  try {
+    const arrayBuffer = await audioFile.arrayBuffer();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    const pcm = audioBuffer.getChannelData(0);
 
-  window.clearResult = function() {
-    $('result-card').classList.remove('visible');
-    $('chunks-log').innerHTML = '';
-    $('chunks-log').classList.remove('visible');
-  };
+    const lang         = $('lang-select').value === 'auto' ? null : $('lang-select').value;
+    const chunkSeconds = parseInt($('chunk-select').value, 10);
+    const overlap      = chunkSeconds >= 600 ? 2 : 5; // Menos overlap para chunks grandes
 
-  setStatus('Clique em "Carregar modelo" para começar');
+    showProgress('Enviando para processamento em background…', 15);
+    const pcmCopy = pcm.slice(0);
+    audioCtx.close(); // Liberar contexto de áudio da memória
+    worker.postMessage(
+      { type: 'transcribe', pcm: pcmCopy, language: lang, chunkSeconds, overlapSeconds: overlap, sampleRate: 16000 },
+      [pcmCopy.buffer]
+    );
+  } catch (err) {
+    hideProgress();
+    $('bg-notice').classList.remove('visible');
+    $('cancel-btn').classList.remove('visible');
+    $('transcribe-btn').disabled = false;
+    showError('Erro ao decodificar áudio: ' + err.message);
+  }
+};
+
+// ── Cancelar ───────────────────────────────────────────────────────
+window.cancelTranscription = function() {
+  cancelled = true;
+  // Recria worker para parar completamente
+  worker.terminate();
+  worker = newWorker();
+  worker.addEventListener('message', handleWorkerMessage);
+  modelReady = false;
+  hideProgress();
+  $('bg-notice').classList.remove('visible');
+  $('cancel-btn').classList.remove('visible');
+  $('transcribe-btn').disabled = true;
+  setStatus('Cancelado — recarregue o modelo', 'error');
+  $('load-btn').disabled = false;
+  $('load-btn').textContent = 'Carregar modelo';
+  $('model-select').disabled = false;
+  showToast('⚠️ Transcrição cancelada');
+};
+
+// ── Ações resultado ────────────────────────────────────────────────
+let editMode = false;
+window.toggleEdit = function() {
+  editMode = !editMode;
+  const box = $('transcript-box');
+  box.contentEditable = editMode ? 'true' : 'false';
+  box.focus();
+  showToast(editMode ? '✏️ Edição ativada' : '✅ Edição encerrada');
+};
+
+window.copyText = function() {
+  const txt = $('transcript-box').textContent;
+  navigator.clipboard.writeText(txt)
+    .then(() => showToast('Copiado! ✓'))
+    .catch(() => showToast('Erro ao copiar'));
+};
+
+window.downloadTxt = function() {
+  const txt = $('transcript-box').textContent;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
+  a.download = 'transcricao_' + new Date().toISOString().slice(0,10) + '.txt';
+  a.click();
+};
+
+window.downloadSrt = function() {
+  let srt = '';
+  const texts = chunkTexts.length ? chunkTexts : [$('transcript-box').textContent];
+  const starts = chunkStartTimes.length ? chunkStartTimes : [0];
+  const ends   = chunkEndTimes.length   ? chunkEndTimes   : [texts[0].length];
+  texts.forEach((t, i) => {
+    if (!t.trim()) return;
+    const st = starts[i] || 0;
+    const en = ends[i]   || st + 300;
+    srt += `${i+1}\n${toSrtTime(st)} --> ${toSrtTime(en)}\n${t.trim()}\n\n`;
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([srt], { type: 'text/plain' }));
+  a.download = 'transcricao_' + new Date().toISOString().slice(0,10) + '.srt';
+  a.click();
+};
+
+function toSrtTime(s) {
+  const h  = Math.floor(s / 3600);
+  const m  = Math.floor((s % 3600) / 60);
+  const ss = Math.floor(s % 60);
+  const ms = Math.floor((s - Math.floor(s)) * 1000);
+  return `${pad(h)}:${pad(m)}:${pad(ss)},${String(ms).padStart(3,'0')}`;
+}
+function pad(n) { return String(n).padStart(2,'0'); }
+
+window.clearResult = function() {
+  $('result-card').classList.remove('visible');
+  $('chunks-log').innerHTML = '';
+  $('chunks-log').classList.remove('visible');
+};
+
+setStatus('Clique em "Carregar modelo" para começar');
 </script>
 </body>
 </html>
