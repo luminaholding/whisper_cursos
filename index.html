@@ -29,99 +29,79 @@
       align-items: center;
       padding: 24px 16px 60px;
     }
-    header {
-      width: 100%;
-      max-width: 640px;
-      text-align: center;
-      margin-bottom: 32px;
-    }
+    header { width: 100%; max-width: 640px; text-align: center; margin-bottom: 28px; }
     header h1 {
-      font-size: 1.9rem;
-      font-weight: 700;
+      font-size: 1.9rem; font-weight: 700;
       background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       margin-bottom: 6px;
     }
     header p { color: var(--subtext); font-size: 0.92rem; }
 
-    /* Status badge */
     #status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 99px;
-      padding: 6px 14px;
-      font-size: 0.8rem;
-      color: var(--subtext);
-      margin-bottom: 28px;
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 99px; padding: 6px 14px;
+      font-size: 0.8rem; color: var(--subtext); margin-bottom: 24px;
     }
     #status-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #f5a623;
-      animation: pulse 1.5s infinite;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #f5a623; animation: pulse 1.5s infinite;
     }
-    #status-dot.ready { background: var(--success); animation: none; }
-    @keyframes pulse {
-      0%,100% { opacity: 1; } 50% { opacity: .3; }
-    }
+    #status-dot.ready  { background: var(--success); animation: none; }
+    #status-dot.error  { background: var(--error);   animation: none; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-    /* Main card */
+    /* Model selector */
+    #model-row {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; max-width: 640px; margin-bottom: 18px;
+    }
+    #model-row label { font-size: 0.82rem; color: var(--subtext); white-space: nowrap; }
+    #model-select {
+      flex:1; background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); padding: 7px 11px;
+      font-size: 0.84rem; outline: none;
+    }
+    #load-btn {
+      padding: 7px 16px; border: none; border-radius: 8px;
+      background: var(--accent); color: #fff;
+      font-size: 0.84rem; font-weight: 600; cursor: pointer;
+      white-space: nowrap; transition: opacity .2s;
+    }
+    #load-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* Progress bar model load */
+    #model-progress-wrap { width: 100%; max-width: 640px; margin-bottom: 16px; display: none; }
+    #model-progress-wrap.visible { display: block; }
+    #model-progress-label { font-size: 0.8rem; color: var(--subtext); margin-bottom: 6px; }
+    #model-progress-bg { height: 5px; background: var(--card); border-radius: 99px; overflow: hidden; }
+    #model-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 99px; transition: width .3s; }
+
     .card {
-      width: 100%;
-      max-width: 640px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px 24px;
-      margin-bottom: 20px;
+      width: 100%; max-width: 640px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 28px 24px; margin-bottom: 20px;
     }
-
-    /* Tabs */
     .tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-      background: var(--card);
-      border-radius: 10px;
-      padding: 4px;
+      display: flex; gap: 8px; margin-bottom: 24px;
+      background: var(--card); border-radius: 10px; padding: 4px;
     }
     .tab {
-      flex: 1;
-      padding: 9px;
-      border: none;
-      border-radius: 8px;
-      background: transparent;
-      color: var(--subtext);
-      cursor: pointer;
-      font-size: 0.88rem;
-      font-weight: 600;
-      transition: all .2s;
+      flex:1; padding: 9px; border: none; border-radius: 8px;
+      background: transparent; color: var(--subtext);
+      cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all .2s;
     }
-    .tab.active {
-      background: var(--accent);
-      color: #fff;
-    }
+    .tab.active { background: var(--accent); color: #fff; }
+    .panel { display: none; } .panel.active { display: block; }
 
-    /* Panels */
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    /* Drop zone */
     #drop-zone {
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      padding: 44px 20px;
-      text-align: center;
-      cursor: pointer;
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      padding: 44px 20px; text-align: center; cursor: pointer;
       transition: border-color .25s, background .25s;
     }
     #drop-zone:hover, #drop-zone.drag-over {
-      border-color: var(--accent);
-      background: rgba(124,106,247,.05);
+      border-color: var(--accent); background: rgba(124,106,247,.05);
     }
     #drop-zone svg { margin-bottom: 14px; opacity: .6; }
     #drop-zone p { color: var(--subtext); font-size: 0.9rem; }
@@ -129,203 +109,130 @@
     #file-input { display: none; }
 
     #file-info {
-      display: none;
-      align-items: center;
-      gap: 12px;
-      background: var(--card);
-      border-radius: 10px;
-      padding: 12px 16px;
-      margin-top: 14px;
-      font-size: 0.88rem;
+      display: none; align-items: center; gap: 12px;
+      background: var(--card); border-radius: 10px;
+      padding: 12px 16px; margin-top: 14px; font-size: 0.88rem;
     }
     #file-info.visible { display: flex; }
     #file-icon { font-size: 1.5rem; }
-    #file-name { font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #file-name { font-weight: 600; flex:1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #file-size { color: var(--subtext); }
     #remove-file { background: none; border: none; color: var(--error); cursor: pointer; font-size: 1.1rem; padding: 4px; }
 
-    /* Mic panel */
     #rec-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 100%;
-      padding: 36px;
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      background: transparent;
-      color: var(--subtext);
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all .2s;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 10px; width: 100%; padding: 36px;
+      border: 2px dashed var(--border); border-radius: var(--radius);
+      background: transparent; color: var(--subtext);
+      cursor: pointer; font-size: 0.9rem; transition: all .2s;
     }
     #rec-btn:hover { border-color: var(--accent); color: var(--text); }
     #rec-btn.recording {
-      border-color: var(--error);
-      background: rgba(224,92,125,.05);
-      color: var(--error);
-      animation: recPulse 1.2s infinite;
+      border-color: var(--error); background: rgba(224,92,125,.05);
+      color: var(--error); animation: recPulse 1.2s infinite;
     }
     @keyframes recPulse {
-      0%,100% { box-shadow: 0 0 0 0 rgba(224,92,125,0); }
-      50% { box-shadow: 0 0 0 8px rgba(224,92,125,.15); }
+      0%,100%{box-shadow:0 0 0 0 rgba(224,92,125,0)}
+      50%{box-shadow:0 0 0 8px rgba(224,92,125,.15)}
     }
     #rec-icon { font-size: 2.4rem; }
     #timer { font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums; display: none; }
     #timer.visible { display: block; }
 
-    /* Language select */
-    .field-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 20px;
-    }
+    .field-row { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
     label { font-size: 0.85rem; color: var(--subtext); white-space: nowrap; }
     select {
-      flex: 1;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      padding: 8px 12px;
-      font-size: 0.88rem;
-      outline: none;
+      flex:1; background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); padding: 8px 12px;
+      font-size: 0.88rem; outline: none;
     }
     select:focus { border-color: var(--accent); }
 
-    /* Transcribe button */
     #transcribe-btn {
-      width: 100%;
-      margin-top: 20px;
-      padding: 14px;
-      border: none;
+      width: 100%; margin-top: 20px; padding: 14px; border: none;
       border-radius: var(--radius);
       background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
+      color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer;
       transition: opacity .2s, transform .1s;
     }
     #transcribe-btn:hover { opacity: .9; }
     #transcribe-btn:active { transform: scale(.98); }
     #transcribe-btn:disabled { opacity: .45; cursor: not-allowed; }
 
-    /* Progress */
-    #progress-wrap {
-      display: none;
-      margin-top: 18px;
-    }
+    #progress-wrap { display: none; margin-top: 18px; }
     #progress-wrap.visible { display: block; }
     #progress-label { font-size: 0.82rem; color: var(--subtext); margin-bottom: 7px; }
-    #progress-bar-bg {
-      height: 6px;
-      background: var(--card);
-      border-radius: 99px;
-      overflow: hidden;
-    }
-    #progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 99px;
-      transition: width .4s;
-    }
+    #progress-bar-bg { height: 6px; background: var(--card); border-radius: 99px; overflow: hidden; }
+    #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 99px; transition: width .4s; }
 
-    /* Result card */
     #result-card {
-      display: none;
-      width: 100%;
-      max-width: 640px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
+      display: none; width: 100%; max-width: 640px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
     }
     #result-card.visible { display: block; }
-    .result-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-    }
+    .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .result-header h2 { font-size: 1rem; font-weight: 700; }
     .result-actions { display: flex; gap: 8px; }
     .action-btn {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      padding: 6px 13px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: border-color .2s;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); padding: 6px 13px;
+      font-size: 0.8rem; cursor: pointer; transition: border-color .2s;
     }
     .action-btn:hover { border-color: var(--accent); }
     #transcript-box {
-      background: var(--card);
-      border-radius: 10px;
-      padding: 16px;
-      font-size: 0.9rem;
-      line-height: 1.7;
-      color: var(--text);
-      max-height: 360px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
+      background: var(--card); border-radius: 10px; padding: 16px;
+      font-size: 0.9rem; line-height: 1.7; color: var(--text);
+      max-height: 400px; overflow-y: auto;
+      white-space: pre-wrap; word-break: break-word;
     }
-    #word-count {
-      margin-top: 10px;
-      font-size: 0.78rem;
-      color: var(--subtext);
-      text-align: right;
-    }
+    #word-count { margin-top: 10px; font-size: 0.78rem; color: var(--subtext); text-align: right; }
 
-    /* Toast */
     #toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
+      position: fixed; bottom: 24px; left: 50%;
       transform: translateX(-50%) translateY(80px);
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px 20px;
-      border-radius: 99px;
-      font-size: 0.85rem;
-      transition: transform .3s;
-      pointer-events: none;
-      z-index: 999;
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 20px;
+      border-radius: 99px; font-size: 0.85rem;
+      transition: transform .3s; pointer-events: none; z-index: 999;
     }
     #toast.show { transform: translateX(-50%) translateY(0); }
 
-    /* Warning box */
-    .warning-box {
-      background: rgba(245,166,35,.07);
-      border: 1px solid rgba(245,166,35,.3);
-      border-radius: 10px;
-      padding: 14px 16px;
-      font-size: 0.82rem;
-      color: #f5c842;
-      line-height: 1.6;
-      margin-top: 16px;
+    .info-box {
+      background: rgba(91,134,229,.07); border: 1px solid rgba(91,134,229,.25);
+      border-radius: 10px; padding: 13px 15px;
+      font-size: 0.81rem; color: #90b4f7; line-height: 1.6; margin-top: 16px;
     }
-    .warning-box strong { display: block; margin-bottom: 4px; }
+    .info-box strong { display: block; margin-bottom: 3px; }
   </style>
 </head>
 <body>
 
 <header>
   <h1>🎙️ Whisper Cursos</h1>
-  <p>Transcreva seus treinamentos gravados com IA — offline e no browser</p>
+  <p>Transcrição de treinamentos com IA — direto no browser, sem servidor</p>
 </header>
 
 <div id="status-badge">
   <span id="status-dot"></span>
-  <span id="status-text">Carregando modelo Whisper…</span>
+  <span id="status-text">Aguardando carregamento do modelo…</span>
+</div>
+
+<!-- Model loader -->
+<div id="model-row">
+  <label for="model-select">Modelo:</label>
+  <select id="model-select">
+    <option value="Xenova/whisper-tiny">Tiny (~75 MB) — mais rápido</option>
+    <option value="Xenova/whisper-base">Base (~145 MB) — equilibrado</option>
+    <option value="Xenova/whisper-small" selected>Small (~250 MB) — recomendado ✅</option>
+    <option value="Xenova/whisper-medium">Medium (~770 MB) — mais preciso</option>
+  </select>
+  <button id="load-btn" onclick="loadModel()">Carregar modelo</button>
+</div>
+
+<div id="model-progress-wrap">
+  <div id="model-progress-label">Baixando modelo… (apenas no primeiro uso)</div>
+  <div id="model-progress-bg"><div id="model-progress-bar"></div></div>
 </div>
 
 <div class="card">
@@ -334,7 +241,6 @@
     <button class="tab" onclick="switchTab('mic')">🎤 Gravar Agora</button>
   </div>
 
-  <!-- Upload panel -->
   <div id="panel-upload" class="panel active">
     <div id="drop-zone" onclick="document.getElementById('file-input').click()">
       <svg width="48" height="48" fill="none" viewBox="0 0 24 24">
@@ -342,10 +248,9 @@
         <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3" stroke="#5b86e5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <p><strong>Clique ou arraste um arquivo aqui</strong></p>
-      <p style="margin-top:6px;font-size:.8rem">MP3, MP4, WAV, M4A, OGG, WEBM — até 500 MB</p>
+      <p style="margin-top:6px;font-size:.8rem">MP3, MP4, WAV, M4A, OGG, WEBM</p>
     </div>
     <input type="file" id="file-input" accept="audio/*,video/*" />
-
     <div id="file-info">
       <span id="file-icon">🎵</span>
       <span id="file-name">—</span>
@@ -354,7 +259,6 @@
     </div>
   </div>
 
-  <!-- Mic panel -->
   <div id="panel-mic" class="panel">
     <button id="rec-btn" onclick="toggleRecording()">
       <span id="rec-icon">🎙️</span>
@@ -363,36 +267,30 @@
     </button>
   </div>
 
-  <!-- Language -->
   <div class="field-row">
     <label for="lang-select">Idioma:</label>
     <select id="lang-select">
-      <option value="pt">🇧🇷 Português</option>
-      <option value="en">🇺🇸 Inglês</option>
-      <option value="es">🇪🇸 Espanhol</option>
-      <option value="fr">🇫🇷 Francês</option>
-      <option value="de">🇩🇪 Alemão</option>
-      <option value="auto">🌐 Detecção automática</option>
+      <option value="portuguese">🇧🇷 Português</option>
+      <option value="english">🇺🇸 Inglês</option>
+      <option value="spanish">🇪🇸 Espanhol</option>
+      <option value="french">🇫🇷 Francês</option>
+      <option value="german">🇩🇪 Alemão</option>
     </select>
   </div>
 
-  <button id="transcribe-btn" onclick="startTranscription()" disabled>
-    Transcrever
-  </button>
+  <button id="transcribe-btn" onclick="startTranscription()" disabled>Transcrever</button>
 
   <div id="progress-wrap">
-    <div id="progress-label">Inicializando…</div>
+    <div id="progress-label">Processando…</div>
     <div id="progress-bar-bg"><div id="progress-bar"></div></div>
   </div>
 
-  <div class="warning-box">
-    <strong>⚙️ Integração com Whisper.cpp (WASM)</strong>
-    Siga o <a href="README.md" style="color:#f5c842">README.md</a> para compilar o Whisper.cpp para WebAssembly e habilitar a transcrição real offline.
-    Enquanto os arquivos WASM não estiverem presentes, o botão funcionará em modo de demonstração.
+  <div class="info-box">
+    <strong>ℹ️ Como funciona</strong>
+    Clique em <b>Carregar modelo</b> uma vez — o modelo Whisper é baixado do HuggingFace e fica em cache no seu browser. Nas próximas vezes, carrega instantaneamente. Todo processamento acontece no seu dispositivo.
   </div>
 </div>
 
-<!-- Result -->
 <div id="result-card">
   <div class="result-header">
     <h2>📝 Transcrição</h2>
@@ -406,92 +304,147 @@
   <div id="word-count"></div>
 </div>
 
-<div id="toast">Copiado!</div>
+<div id="toast"></div>
 
-<script>
-  // ─── Estado ───────────────────────────────────────────────
-  let audioFile = null;
+<script type="module">
+  // ── Imports Transformers.js (Xenova — roda no browser via ONNX) ──
+  import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+
+  // Permite download direto do HuggingFace no browser
+  env.allowLocalModels = false;
+
+  // ── Estado ──────────────────────────────────────────────────────
+  let transcriber = null;
+  let audioFile   = null;
   let mediaRecorder = null;
   let recordedChunks = [];
-  let timerInterval = null;
+  let timerInterval  = null;
   let seconds = 0;
-  let whisperLoaded = false;
 
-  // ─── Status badge ─────────────────────────────────────────
-  function setStatus(text, ready = false) {
-    document.getElementById('status-text').textContent = text;
-    const dot = document.getElementById('status-dot');
-    if (ready) dot.classList.add('ready');
-    else dot.classList.remove('ready');
+  // ── Helpers UI ──────────────────────────────────────────────────
+  const $ = id => document.getElementById(id);
+
+  function setStatus(text, state = 'loading') {
+    $('status-text').textContent = text;
+    const dot = $('status-dot');
+    dot.className = '';
+    if (state === 'ready') dot.classList.add('ready');
+    if (state === 'error') dot.classList.add('error');
   }
 
-  // Tenta detectar se os arquivos WASM estão disponíveis
-  async function checkWasm() {
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  function showProgress(label, pct) {
+    $('progress-wrap').classList.add('visible');
+    $('progress-label').textContent = label;
+    $('progress-bar').style.width = pct + '%';
+  }
+
+  function hideProgress() {
+    $('progress-wrap').classList.remove('visible');
+    $('progress-bar').style.width = '0%';
+  }
+
+  function updateBtn() {
+    $('transcribe-btn').disabled = !audioFile || !transcriber;
+  }
+
+  function formatBytes(b) {
+    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1048576).toFixed(1) + ' MB';
+  }
+
+  // ── Carregar modelo ─────────────────────────────────────────────
+  window.loadModel = async function() {
+    const model = $('model-select').value;
+    $('load-btn').disabled = true;
+    $('model-select').disabled = true;
+    setStatus('Baixando modelo… (pode demorar na 1ª vez)');
+    $('model-progress-wrap').classList.add('visible');
+    $('model-progress-bar').style.width = '5%';
+
     try {
-      const r = await fetch('whisper.wasm', { method: 'HEAD' });
-      if (r.ok) {
-        whisperLoaded = true;
-        setStatus('Modelo Whisper pronto ✓', true);
-      } else throw new Error();
-    } catch {
-      setStatus('Modo demo (WASM não encontrado — veja README)', false);
+      transcriber = await pipeline(
+        'automatic-speech-recognition',
+        model,
+        {
+          progress_callback: (p) => {
+            if (p.status === 'downloading') {
+              const pct = p.total ? Math.round((p.loaded / p.total) * 90) : 50;
+              $('model-progress-bar').style.width = pct + '%';
+              $('model-progress-label').textContent =
+                `Baixando modelo… ${formatBytes(p.loaded || 0)} / ${formatBytes(p.total || 0)}`;
+            }
+            if (p.status === 'loading') {
+              $('model-progress-bar').style.width = '95%';
+              $('model-progress-label').textContent = 'Carregando modelo na memória…';
+            }
+          }
+        }
+      );
+      $('model-progress-bar').style.width = '100%';
+      $('model-progress-label').textContent = 'Modelo carregado! ✓';
+      setTimeout(() => $('model-progress-wrap').classList.remove('visible'), 1800);
+      setStatus('Modelo pronto — pode transcrever! ✓', 'ready');
+      $('load-btn').textContent = '✓ Carregado';
+      updateBtn();
+    } catch (err) {
+      setStatus('Erro ao carregar modelo: ' + err.message, 'error');
+      $('model-progress-label').textContent = 'Falha no carregamento.';
+      $('load-btn').disabled = false;
+      $('load-btn').textContent = 'Tentar novamente';
+      $('model-select').disabled = false;
     }
-  }
-  checkWasm();
+  };
 
-  // ─── Tabs ─────────────────────────────────────────────────
-  function switchTab(tab) {
+  // ── Tabs ────────────────────────────────────────────────────────
+  window.switchTab = function(tab) {
     document.querySelectorAll('.tab').forEach((t, i) => {
-      t.classList.toggle('active', (i === 0 && tab === 'upload') || (i === 1 && tab === 'mic'));
+      t.classList.toggle('active', (i===0&&tab==='upload')||(i===1&&tab==='mic'));
     });
-    document.getElementById('panel-upload').classList.toggle('active', tab === 'upload');
-    document.getElementById('panel-mic').classList.toggle('active', tab === 'mic');
-    updateBtn();
-  }
+    $('panel-upload').classList.toggle('active', tab==='upload');
+    $('panel-mic').classList.toggle('active', tab==='mic');
+  };
 
-  // ─── Drag & Drop ──────────────────────────────────────────
-  const dz = document.getElementById('drop-zone');
+  // ── Drag & Drop / Upload ────────────────────────────────────────
+  const dz = $('drop-zone');
   dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
   dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
   dz.addEventListener('drop', e => {
-    e.preventDefault();
-    dz.classList.remove('drag-over');
-    const f = e.dataTransfer.files[0];
-    if (f) setFile(f);
+    e.preventDefault(); dz.classList.remove('drag-over');
+    if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
   });
-
-  document.getElementById('file-input').addEventListener('change', e => {
+  $('file-input').addEventListener('change', e => {
     if (e.target.files[0]) setFile(e.target.files[0]);
   });
 
   function setFile(f) {
     audioFile = f;
     const ext = f.name.split('.').pop().toLowerCase();
-    const icons = { mp3: '🎵', mp4: '🎬', wav: '🎵', m4a: '🎵', ogg: '🎵', webm: '🎬' };
-    document.getElementById('file-icon').textContent = icons[ext] || '📄';
-    document.getElementById('file-name').textContent = f.name;
-    document.getElementById('file-size').textContent = formatBytes(f.size);
-    document.getElementById('file-info').classList.add('visible');
+    const icons = { mp3:'🎵', mp4:'🎬', wav:'🎵', m4a:'🎵', ogg:'🎵', webm:'🎬' };
+    $('file-icon').textContent = icons[ext] || '📄';
+    $('file-name').textContent = f.name;
+    $('file-size').textContent = formatBytes(f.size);
+    $('file-info').classList.add('visible');
     updateBtn();
   }
 
-  document.getElementById('remove-file').onclick = e => {
+  $('remove-file').onclick = e => {
     e.stopPropagation();
     audioFile = null;
-    document.getElementById('file-info').classList.remove('visible');
-    document.getElementById('file-input').value = '';
+    $('file-info').classList.remove('visible');
+    $('file-input').value = '';
     updateBtn();
   };
 
-  function formatBytes(b) {
-    if (b < 1024) return b + ' B';
-    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
-    return (b / 1048576).toFixed(1) + ' MB';
-  }
-
-  // ─── Gravação ─────────────────────────────────────────────
-  async function toggleRecording() {
-    const btn = document.getElementById('rec-btn');
+  // ── Gravação ────────────────────────────────────────────────────
+  window.toggleRecording = async function() {
+    const btn = $('rec-btn');
     if (!mediaRecorder || mediaRecorder.state === 'inactive') {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -500,154 +453,112 @@
         mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
         mediaRecorder.onstop = () => {
           const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-          setFile(new File([blob], 'gravacao_' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.webm', { type: 'audio/webm' }));
+          const name = 'gravacao_' + new Date().toISOString().slice(0,19).replace(/:/g,'-') + '.webm';
+          setFile(new File([blob], name, { type: 'audio/webm' }));
           stream.getTracks().forEach(t => t.stop());
         };
         mediaRecorder.start();
         btn.classList.add('recording');
-        document.getElementById('rec-icon').textContent = '⏹️';
-        document.getElementById('rec-label').textContent = 'Gravando… toque para parar';
+        $('rec-icon').textContent = '⏹️';
+        $('rec-label').textContent = 'Gravando… toque para parar';
         startTimer();
-      } catch {
-        alert('Permissão para microfone negada ou não disponível.');
-      }
+      } catch { alert('Permissão para microfone negada ou indisponível.'); }
     } else {
       mediaRecorder.stop();
       btn.classList.remove('recording');
-      document.getElementById('rec-icon').textContent = '🎙️';
-      document.getElementById('rec-label').textContent = 'Toque para gravar';
+      $('rec-icon').textContent = '🎙️';
+      $('rec-label').textContent = 'Toque para gravar';
       stopTimer();
-      switchTab('upload');
+      window.switchTab('upload');
     }
-  }
+  };
 
   function startTimer() {
     seconds = 0;
-    const el = document.getElementById('timer');
+    const el = $('timer');
     el.classList.add('visible');
     timerInterval = setInterval(() => {
       seconds++;
-      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-      const s = String(seconds % 60).padStart(2, '0');
-      el.textContent = m + ':' + s;
+      el.textContent = String(Math.floor(seconds/60)).padStart(2,'0') + ':' + String(seconds%60).padStart(2,'0');
     }, 1000);
   }
   function stopTimer() {
     clearInterval(timerInterval);
-    document.getElementById('timer').classList.remove('visible');
+    $('timer').classList.remove('visible');
   }
 
-  // ─── Botão transcrever ────────────────────────────────────
-  function updateBtn() {
-    document.getElementById('transcribe-btn').disabled = !audioFile;
-  }
+  // ── Transcrição real com Transformers.js ────────────────────────
+  window.startTranscription = async function() {
+    if (!audioFile || !transcriber) return;
+    $('transcribe-btn').disabled = true;
+    $('result-card').classList.remove('visible');
+    showProgress('Lendo arquivo de áudio…', 15);
 
-  // ─── Transcrição ──────────────────────────────────────────
-  async function startTranscription() {
-    if (!audioFile) return;
-    document.getElementById('transcribe-btn').disabled = true;
-    document.getElementById('result-card').classList.remove('visible');
-    showProgress('Carregando áudio…', 10);
+    try {
+      // Decodifica áudio para Float32Array PCM 16kHz
+      const arrayBuffer = await audioFile.arrayBuffer();
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      const pcm = audioBuffer.getChannelData(0); // canal mono, 16kHz
 
-    if (whisperLoaded) {
-      await runWhisperWasm();
-    } else {
-      await runDemo();
+      showProgress('Enviando para o modelo Whisper…', 40);
+
+      const lang = $('lang-select').value;
+
+      const result = await transcriber(pcm, {
+        language: lang,
+        task: 'transcribe',
+        chunk_length_s: 30,       // processa em blocos de 30s (suporte a áudios longos)
+        stride_length_s: 5,
+        return_timestamps: false,
+        callback_function: (beams) => {
+          // Atualiza progresso conforme tokens são gerados
+          showProgress('Transcrevendo… aguarde', 65 + Math.random() * 20);
+        }
+      });
+
+      showProgress('Finalizando…', 98);
+      showResult(result.text.trim());
+    } catch (err) {
+      hideProgress();
+      $('transcribe-btn').disabled = false;
+      showToast('Erro na transcrição: ' + err.message);
+      console.error(err);
     }
-  }
-
-  // Função real — chamada quando whisper.wasm estiver disponível
-  async function runWhisperWasm() {
-    showProgress('Decodificando áudio…', 25);
-    // Decodifica para PCM 16kHz mono
-    const arrayBuffer = await audioFile.arrayBuffer();
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
-    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-    const pcm = audioBuffer.getChannelData(0); // Float32Array
-
-    showProgress('Enviando para Whisper…', 50);
-    const lang = document.getElementById('lang-select').value;
-
-    // INTEGRAÇÃO WASM:
-    // Descomente e adapte após compilar whisper.wasm:
-    //
-    // const { createWhisper } = await import('./whisper.js');
-    // const w = await createWhisper();
-    // await w.loadModel('./ggml-small.bin');
-    // const result = await w.transcribe(pcm, lang);
-    // showResult(result.text);
-
-    // Placeholder até WASM estar configurado:
-    showProgress('Processando…', 80);
-    await sleep(1200);
-    showResult('[WASM detectado mas transcription() não implementada — veja README para finalizar integração]');
-  }
-
-  // Demo sem WASM
-  async function runDemo() {
-    const steps = [
-      ['Lendo arquivo de áudio…', 20],
-      ['Pré-processando amostras…', 45],
-      ['Executando modelo Whisper (demo)…', 70],
-      ['Finalizando transcrição…', 90],
-    ];
-    for (const [label, pct] of steps) {
-      showProgress(label, pct);
-      await sleep(700);
-    }
-    const lang = document.getElementById('lang-select').value;
-    const demos = {
-      pt: 'Esta é uma transcrição de demonstração em português.\n\nPara ativar a transcrição real, siga o guia no README.md e compile o Whisper.cpp para WebAssembly (WASM).\n\nApós isso, faça o upload dos arquivos whisper.wasm e ggml-small.bin na pasta do projeto e o aplicativo funcionará completamente offline.',
-      en: 'This is a demonstration transcription in English.\n\nTo enable real transcription, follow the README.md guide to compile Whisper.cpp to WebAssembly (WASM).\n\nAfter that, upload the whisper.wasm and ggml-small.bin files to the project folder and the app will work fully offline.',
-      es: 'Esta es una transcripción de demostración en español.\n\nPara habilitar la transcripción real, siga la guía en README.md para compilar Whisper.cpp a WebAssembly (WASM).',
-    };
-    showResult(demos[lang] || demos.en);
-  }
-
-  function showProgress(label, pct) {
-    document.getElementById('progress-wrap').classList.add('visible');
-    document.getElementById('progress-label').textContent = label;
-    document.getElementById('progress-bar').style.width = pct + '%';
-  }
-  function hideProgress() {
-    document.getElementById('progress-wrap').classList.remove('visible');
-    document.getElementById('progress-bar').style.width = '0%';
-  }
+  };
 
   function showResult(text) {
     hideProgress();
-    document.getElementById('transcribe-btn').disabled = false;
-    document.getElementById('transcript-box').textContent = text;
+    $('transcribe-btn').disabled = false;
+    $('transcript-box').textContent = text;
     const words = text.trim().split(/\s+/).length;
-    document.getElementById('word-count').textContent = `${words} palavras · ${text.length} caracteres`;
-    document.getElementById('result-card').classList.add('visible');
+    $('word-count').textContent = `${words} palavras · ${text.length} caracteres`;
+    $('result-card').classList.add('visible');
+    $('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  // ─── Ações resultado ──────────────────────────────────────
-  function copyText() {
-    const txt = document.getElementById('transcript-box').textContent;
-    navigator.clipboard.writeText(txt).then(() => showToast('Copiado!')).catch(() => showToast('Erro ao copiar'));
-  }
-  function downloadTxt() {
-    const txt = document.getElementById('transcript-box').textContent;
+  // ── Ações resultado ─────────────────────────────────────────────
+  window.copyText = function() {
+    const txt = $('transcript-box').textContent;
+    navigator.clipboard.writeText(txt)
+      .then(() => showToast('Copiado! ✓'))
+      .catch(() => showToast('Erro ao copiar'));
+  };
+
+  window.downloadTxt = function() {
+    const txt = $('transcript-box').textContent;
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([txt], { type: 'text/plain' }));
     a.download = 'transcricao_' + new Date().toISOString().slice(0,10) + '.txt';
     a.click();
-  }
-  function clearResult() {
-    document.getElementById('result-card').classList.remove('visible');
-  }
+  };
 
-  // ─── Toast ────────────────────────────────────────────────
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2200);
-  }
+  window.clearResult = function() {
+    $('result-card').classList.remove('visible');
+  };
 
-  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+  // Inicializa
+  setStatus('Clique em "Carregar modelo" para começar');
 </script>
 </body>
 </html>
