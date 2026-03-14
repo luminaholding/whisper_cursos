@@ -51,7 +51,6 @@
       border-radius: 10px; padding: 11px 16px; font-size: 0.82rem; color: var(--error); margin-bottom: 12px;
     }
     #error-banner.visible { display: flex; align-items: flex-start; gap: 9px; }
-    /* Banner de sessão pausada */
     #resume-banner {
       display: none; width: 100%; max-width: 680px;
       background: rgba(124,106,247,.1); border: 1px solid rgba(124,106,247,.4);
@@ -72,11 +71,13 @@
       background: transparent; color: var(--subtext);
       font-size: 0.83rem; cursor: pointer;
     }
+    /* Model row: select sempre visível, botão some quando desnecessario */
     #model-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 680px; margin-bottom: 4px; }
     #model-row label { font-size: 0.82rem; color: var(--subtext); white-space: nowrap; }
     #model-select { flex:1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 11px; font-size: 0.84rem; outline: none; }
     #load-btn { padding: 7px 16px; border: none; border-radius: 8px; background: var(--accent); color: #fff; font-size: 0.84rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity .2s; }
     #load-btn:disabled { opacity: .45; cursor: not-allowed; }
+    #load-btn.hidden { display: none; }
     #model-progress-wrap { width: 100%; max-width: 680px; margin-bottom: 8px; display: none; }
     #model-progress-wrap.visible { display: block; }
     #model-progress-label { font-size: 0.8rem; color: var(--subtext); margin-bottom: 6px; }
@@ -181,10 +182,9 @@
 
 <div id="status-badge">
   <span id="status-dot"></span>
-  <span id="status-text">Aguardando carregamento do modelo…</span>
+  <span id="status-text">Carregando modelo…</span>
 </div>
 
-<!-- Banner de retomada: aparece quando há sessão pausada salva -->
 <div id="resume-banner">
   <div>
     <strong>⏸️ Transcrição pausada encontrada</strong><br>
@@ -206,6 +206,7 @@
   <span>Processando em background — pode trocar de app, mas mantenha a tela ligada para arquivos longos.</span>
 </div>
 
+<!-- Model row: select para trocar modelo manualmente se necessario -->
 <div id="model-row">
   <label for="model-select">Modelo:</label>
   <select id="model-select">
@@ -214,11 +215,12 @@
     <option value="Xenova/whisper-small" selected>Small (~250 MB) — recomendado ✅</option>
     <option value="Xenova/whisper-medium">Medium (~770 MB) — mais preciso</option>
   </select>
-  <button id="load-btn" onclick="loadModel()">Carregar modelo</button>
+  <!-- Botao so aparece quando modelo falha ou usuario muda o select manualmente -->
+  <button id="load-btn" class="hidden" onclick="loadModel()">Carregar</button>
 </div>
 <div id="model-cache-badge">✓ Modelo em cache local — carregamento rápido</div>
 <div id="model-progress-wrap">
-  <div id="model-progress-label">Baixando modelo…</div>
+  <div id="model-progress-label">Carregando modelo…</div>
   <div id="model-progress-bg"><div id="model-progress-bar"></div></div>
 </div>
 
@@ -302,7 +304,7 @@
 
   <div class="info-box">
     <strong>ℹ️ Segundo plano + retomada automática</strong>
-    Web Worker ativo — pode trocar de app. Se a transcrição for interrompida (rede, suspendência, cancelamento), o progresso é salvo automaticamente e você pode continuar de onde parou.
+    Web Worker ativo — pode trocar de app. Se a transcrição for interrompida, o progresso é salvo e você pode continuar de onde parou.
   </div>
 </div>
 
@@ -336,9 +338,8 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
-// DB v2: stores 'sessions' (concluídas) + 'paused_sessions' (pausadas/interrompidas)
 const db = await openDB('whisper-cursos', 2, {
-  upgrade(db, oldVersion) {
+  upgrade(db) {
     if (!db.objectStoreNames.contains('sessions'))
       db.createObjectStore('sessions', { keyPath: 'id', autoIncrement: true });
     if (!db.objectStoreNames.contains('paused_sessions'))
@@ -355,7 +356,6 @@ let cancelled = false, editMode = false;
 let chunkStartTimes = [], chunkEndTimes = [], chunkTexts = [];
 let transcriptionStartTime = 0, chunksCompleted = 0, totalChunks = 0;
 let currentSessionId = null;
-// Guarda PCM decodificado em memória para permitir retomada na mesma sessão
 let currentPcm = null, currentLang = null, currentChunkSec = 300, currentOverlap = 5;
 
 const $ = id => document.getElementById(id);
@@ -413,6 +413,7 @@ worker.addEventListener('message', handleWorkerMessage);
 function handleWorkerMessage(e) {
   const d=e.data;
   if(d.type==='model_progress') {
+    $('model-progress-wrap').classList.add('visible');
     if(d.status==='downloading') {
       const pct=d.total?Math.round((d.loaded/d.total)*90):50;
       $('model-progress-bar').style.width=pct+'%';
@@ -428,13 +429,17 @@ function handleWorkerMessage(e) {
     $('model-progress-label').textContent='Modelo carregado! ✓';
     setTimeout(()=>$('model-progress-wrap').classList.remove('visible'),1800);
     setStatus('Modelo pronto — pode transcrever! ✓','ready');
-    $('load-btn').textContent='✓ Carregado';
+    // Esconde o botao e mostra badge de cache
+    $('load-btn').classList.add('hidden');
     markModelCached($('model-select').value);
     updateBtn();
   }
   if(d.type==='model_error') {
-    setStatus('Erro ao carregar modelo: '+d.message,'error');
-    $('load-btn').disabled=false; $('load-btn').textContent='Tentar novamente';
+    setStatus('Erro ao carregar modelo — verifique a conexão','error');
+    // Só mostra o botao quando falha, para o usuario poder tentar novamente
+    $('load-btn').classList.remove('hidden');
+    $('load-btn').disabled=false;
+    $('load-btn').textContent='Tentar novamente';
     $('model-select').disabled=false;
   }
   if(d.type==='chunk_start') {
@@ -457,19 +462,15 @@ function handleWorkerMessage(e) {
     autoSaveSession(fullText,false);
   }
   if(d.type==='chunk_error') logChunk(d.chunk,'?','err','❌');
-
-  // PAUSED: worker pausou (cancelamento, suspensão, erro de rede)
   if(d.type==='paused') {
     hideProgress();
     $('bg-notice').classList.remove('visible');
     $('cancel-btn').classList.remove('visible');
     $('transcribe-btn').disabled = !audioFile || !modelReady;
-    setStatus(`Pausado no bloco ${d.fromChunk}/${d.total} — progresso salvo`,  'error');
+    setStatus(`Pausado no bloco ${d.fromChunk}/${d.total} — progresso salvo`,'error');
     showToast('⏸️ Pausado — progresso salvo!');
-    // Persiste estado no IndexedDB para retomada mesmo após fechar o app
     savePausedSession(d);
   }
-
   if(d.type==='done') {
     if(cancelled) return;
     hideProgress();
@@ -485,40 +486,86 @@ function handleWorkerMessage(e) {
     setStatus('Transcrição concluída ✓','ready');
     showToast('✅ Transcrição concluída!');
     autoSaveSession(text,true);
-    // Limpa sessão pausada (já concluída)
     clearPausedSessionsForFile(audioFile?.name);
     sendNotification('✅ Transcrição concluída!','Abra o app para ver o resultado.');
   }
 }
 
+// ── Auto-load do modelo ao abrir o app ────────────────────────────────
+function autoLoadModel() {
+  const model = $('model-select').value;
+  setStatus('Carregando modelo…');
+  $('model-progress-wrap').classList.add('visible');
+  $('model-progress-bar').style.width='5%';
+  $('model-progress-label').textContent = isModelCached(model)
+    ? 'Carregando do cache local…'
+    : 'Baixando modelo (apenas na 1ª vez)…';
+  worker.postMessage({type:'load', modelId: model});
+  requestNotifPerm();
+}
+
+// Dispara imediatamente ao carregar a página
+autoLoadModel();
+
+// Se o usuario mudar o select manualmente, mostra botao e nao recarrega sozinho
+$('model-select').addEventListener('change', () => {
+  checkModelCache($('model-select').value);
+  modelReady = false;
+  updateBtn();
+  $('load-btn').classList.remove('hidden');
+  $('load-btn').disabled = false;
+  $('load-btn').textContent = 'Carregar';
+  setStatus('Modelo alterado — clique em Carregar','error');
+});
+
+window.loadModel = function() {
+  const model = $('model-select').value;
+  $('load-btn').disabled = true;
+  $('model-select').disabled = true;
+  setStatus('Carregando modelo…');
+  $('model-progress-wrap').classList.add('visible');
+  $('model-progress-bar').style.width='5%';
+  worker.postMessage({type:'load', modelId: model});
+};
+
+// ── Cache helpers ────────────────────────────────────────────────────
+function isModelCached(id) {
+  return JSON.parse(localStorage.getItem('cachedModels')||'[]').includes(id);
+}
+function markModelCached(id) {
+  const c=JSON.parse(localStorage.getItem('cachedModels')||'[]');
+  if(!c.includes(id)){c.push(id);localStorage.setItem('cachedModels',JSON.stringify(c));}
+  $('model-cache-badge').classList.add('visible');
+}
+function checkModelCache(id) {
+  isModelCached(id)
+    ? $('model-cache-badge').classList.add('visible')
+    : $('model-cache-badge').classList.remove('visible');
+}
+checkModelCache($('model-select').value);
+
 // ── Sessões pausadas ─────────────────────────────────────────────────
-let pendingPausedId = null; // id da sessão pausada aguardando retomada
+let pendingPausedId = null;
 
 async function savePausedSession(pauseData) {
   const name = audioFile?.name || 'Gravação';
-  // Salva PCM como ArrayBuffer para retomada posterior (inclusive após fechar o app)
   const pcmBuffer = currentPcm ? currentPcm.buffer.slice(0) : null;
   const record = {
-    name,
-    date: new Date().toISOString(),
-    fromChunk: pauseData.fromChunk,
-    total: pauseData.total,
+    name, date: new Date().toISOString(),
+    fromChunk: pauseData.fromChunk, total: pauseData.total,
     fullText: pauseData.fullText || '',
     chunkTexts: pauseData.chunkTexts || [],
     chunkStartTimes: pauseData.chunkStartTimes || [],
     chunkEndTimes: pauseData.chunkEndTimes || [],
-    language: currentLang,
-    chunkSeconds: currentChunkSec,
-    overlapSeconds: currentOverlap,
-    pcmBuffer, // ArrayBuffer do áudio decodificado
+    language: currentLang, chunkSeconds: currentChunkSec,
+    overlapSeconds: currentOverlap, pcmBuffer,
   };
   if(pendingPausedId) {
     await db.put('paused_sessions', {...record, id: pendingPausedId});
   } else {
     pendingPausedId = await db.add('paused_sessions', record);
   }
-  renderSessions();
-  checkForPausedSession();
+  renderSessions(); checkForPausedSession();
 }
 
 async function checkForPausedSession() {
@@ -528,17 +575,15 @@ async function checkForPausedSession() {
   pendingPausedId = latest.id;
   const pct = latest.total ? Math.round((latest.fromChunk/latest.total)*100) : 0;
   $('resume-banner-info').textContent =
-    `"${latest.name}" — ${pct}% concluído (bloco ${latest.fromChunk}/${latest.total}). Carregar o modelo e clicar em Continuar.`;
+    `"${latest.name}" — ${pct}% concluído (bloco ${latest.fromChunk}/${latest.total}).`;
   $('resume-banner').classList.add('visible');
 }
 
 window.resumePausedSession = async function() {
   if(!pendingPausedId) return;
-  if(!modelReady) { showToast('⚠️ Carregue o modelo antes de continuar'); return; }
+  if(!modelReady) { showToast('⏳ Aguarde o modelo carregar…'); return; }
   const record = await db.get('paused_sessions', pendingPausedId);
   if(!record) return;
-
-  // Restaura estado local
   chunkTexts       = record.chunkTexts || [];
   chunkStartTimes  = record.chunkStartTimes || [];
   chunkEndTimes    = record.chunkEndTimes || [];
@@ -548,48 +593,28 @@ window.resumePausedSession = async function() {
   cancelled        = false;
   chunksCompleted  = record.fromChunk;
   transcriptionStartTime = Date.now();
-
-  // Exibe progresso parcial já obtido
   if(record.fullText) {
     $('transcript-box').textContent = record.fullText;
     $('result-card').classList.add('visible');
   }
-
   $('resume-banner').classList.remove('visible');
   $('cancel-btn').classList.add('visible');
   $('bg-notice').classList.add('visible');
   showProgress(`Retomando do bloco ${record.fromChunk}/${record.total}…`, Math.round((record.fromChunk/record.total)*90));
   setStatus(`Retomando transcrição do bloco ${record.fromChunk}…`);
-
-  // Usa PCM salvo se disponível, senão usa o PCM em memória
   let pcm = currentPcm;
-  if(!pcm && record.pcmBuffer) {
-    pcm = new Float32Array(record.pcmBuffer);
-    currentPcm = pcm;
-  }
-  if(!pcm) {
-    showError('Não foi possível recuperar o áudio. Selecione o arquivo novamente e clique em Continuar.');
-    return;
-  }
-
+  if(!pcm && record.pcmBuffer) { pcm = new Float32Array(record.pcmBuffer); currentPcm = pcm; }
+  if(!pcm) { showError('Não foi possível recuperar o áudio. Selecione o arquivo novamente.'); return; }
   const resumeFrom = {
-    startChunk:      record.fromChunk,
-    fullText:        record.fullText || '',
-    chunkTexts:      record.chunkTexts || [],
+    startChunk: record.fromChunk, fullText: record.fullText || '',
+    chunkTexts: record.chunkTexts || [],
     chunkStartTimes: record.chunkStartTimes || [],
-    chunkEndTimes:   record.chunkEndTimes || [],
+    chunkEndTimes: record.chunkEndTimes || [],
   };
-
   const pcmCopy = pcm.slice(0);
-  worker.postMessage({
-    type: 'transcribe',
-    pcm: pcmCopy,
-    language: currentLang,
-    chunkSeconds: currentChunkSec,
-    overlapSeconds: currentOverlap,
-    sampleRate: 16000,
-    resumeFrom,
-  }, [pcmCopy.buffer]);
+  worker.postMessage({ type:'transcribe', pcm:pcmCopy, language:currentLang,
+    chunkSeconds:currentChunkSec, overlapSeconds:currentOverlap,
+    sampleRate:16000, resumeFrom }, [pcmCopy.buffer]);
 };
 
 window.discardPausedSession = async function() {
@@ -609,20 +634,7 @@ async function clearPausedSessionsForFile(name) {
   renderSessions();
 }
 
-// Verifica ao abrir o app
 checkForPausedSession();
-
-function markModelCached(id) {
-  const c=JSON.parse(localStorage.getItem('cachedModels')||'[]');
-  if(!c.includes(id)){c.push(id);localStorage.setItem('cachedModels',JSON.stringify(c));}
-  $('model-cache-badge').classList.add('visible');
-}
-function checkModelCache(id) {
-  const c=JSON.parse(localStorage.getItem('cachedModels')||'[]');
-  c.includes(id)?$('model-cache-badge').classList.add('visible'):$('model-cache-badge').classList.remove('visible');
-}
-$('model-select').addEventListener('change',()=>checkModelCache($('model-select').value));
-checkModelCache($('model-select').value);
 
 async function autoSaveSession(text,completed) {
   const name=audioFile?audioFile.name:'Gravação';
@@ -635,33 +647,23 @@ async function autoSaveSession(text,completed) {
 }
 
 async function renderSessions() {
-  const [completed, paused] = await Promise.all([
-    db.getAll('sessions'),
-    db.getAll('paused_sessions'),
-  ]);
-  const all = [
-    ...paused.map(s=>({...s, _paused:true})),
-    ...completed,
-  ];
+  const [completed, paused] = await Promise.all([db.getAll('sessions'), db.getAll('paused_sessions')]);
+  const all = [...paused.map(s=>({...s,_paused:true})), ...completed];
   if(!all.length){$('sessions-section').style.display='none';return;}
   $('sessions-section').style.display='block';
   $('sessions-list').innerHTML='';
   [...all].reverse().forEach(s=>{
     const div=document.createElement('div');
     div.className='session-item'+(s._paused?' paused':'');
-    const preview=s.text||s.fullText?((s.text||s.fullText).slice(0,70)+'…'):'(sem texto)';
-    const status=s._paused
-      ? `⏸️ Pausado ${Math.round((s.fromChunk/s.total)*100)}%`
-      : (s.completed?'✅':'⏳');
+    const preview=(s.text||s.fullText||'').slice(0,70)+'…';
+    const status=s._paused?`⏸️ ${Math.round((s.fromChunk/s.total)*100)}%`:(s.completed?'✅':'⏳');
     div.innerHTML=`
       <div class="session-meta">
         <div class="session-name">${status} ${escHtml(s.name)}</div>
         <div class="session-date">${new Date(s.date).toLocaleString('pt-BR')} — ${escHtml(preview)}</div>
       </div>
-      ${s._paused
-        ? `<button class="session-resume-btn" onclick="loadAndResume(${s.id},event)">▶ Continuar</button>`
-        : ''}
-      <button class="session-del" onclick="deleteSession(${s.id},${!!s._paused},event)" title="Excluir">🗑️</button>`;
+      ${s._paused?`<button class="session-resume-btn" onclick="loadAndResume(${s.id},event)">▶ Continuar</button>`:''}
+      <button class="session-del" onclick="deleteSession(${s.id},${!!s._paused},event)">🗑️</button>`;
     if(!s._paused) div.addEventListener('click',ev=>{if(ev.target.closest('.session-del'))return;loadSession(s);});
     $('sessions-list').appendChild(div);
   });
@@ -671,16 +673,11 @@ function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 
 window.deleteSession=async function(id,isPaused,e){
   e.stopPropagation();
-  const store=isPaused?'paused_sessions':'sessions';
-  await db.delete(store,id);
-  if(isPaused&&pendingPausedId===id){
-    pendingPausedId=null;
-    $('resume-banner').classList.remove('visible');
-  }
+  await db.delete(isPaused?'paused_sessions':'sessions',id);
+  if(isPaused&&pendingPausedId===id){pendingPausedId=null;$('resume-banner').classList.remove('visible');}
   renderSessions();
 };
 
-// Clique em "Continuar" numa sessão pausada da lista
 window.loadAndResume=async function(id,e){
   e.stopPropagation();
   pendingPausedId=id;
@@ -688,15 +685,14 @@ window.loadAndResume=async function(id,e){
 };
 
 function loadSession(s){
-  $('transcript-box').textContent=s.text||s.fullText||'';
+  const txt=s.text||s.fullText||'';
+  $('transcript-box').textContent=txt;
   $('transcript-box').contentEditable='false';
   $('transcript-box').classList.remove('editing');
   $('edit-btn').textContent='✏️ Editar';
-  $('edit-hint').textContent='🔒 Somente leitura — clique em ✏️ Editar para modificar';
+  $('edit-hint').textContent='🔒 Somente leitura';
   editMode=false;
-  const txt=s.text||s.fullText||'';
-  const words=txt.trim().split(/\s+/).length;
-  $('word-count').textContent=`${words} palavras · ${txt.length} caracteres (sessão salva)`;
+  $('word-count').textContent=`${txt.trim().split(/\s+/).length} palavras · ${txt.length} caracteres`;
   $('result-card').classList.add('visible');
   $('result-card').scrollIntoView({behavior:'smooth'});
 }
@@ -705,8 +701,7 @@ window.clearAllSessions=async function(){
   if(!confirm('Apagar todas as transcrições salvas?'))return;
   for(const s of await db.getAll('sessions')) await db.delete('sessions',s.id);
   for(const s of await db.getAll('paused_sessions')) await db.delete('paused_sessions',s.id);
-  pendingPausedId=null;
-  $('resume-banner').classList.remove('visible');
+  pendingPausedId=null; $('resume-banner').classList.remove('visible');
   renderSessions();
 };
 renderSessions();
@@ -718,16 +713,6 @@ function sendNotification(title,body){
   if('Notification'in window&&Notification.permission==='granted')
     new Notification(title,{body,icon:'./icon-192.png'});
 }
-
-window.loadModel=function(){
-  const model=$('model-select').value;
-  $('load-btn').disabled=true; $('model-select').disabled=true;
-  setStatus('Baixando modelo… (pode demorar na 1ª vez)');
-  $('model-progress-wrap').classList.add('visible');
-  $('model-progress-bar').style.width='5%';
-  worker.postMessage({type:'load',modelId:model});
-  requestNotifPerm();
-};
 
 window.switchTab=function(tab){
   document.querySelectorAll('.tab').forEach((t,i)=>{
@@ -746,8 +731,7 @@ $('file-input').addEventListener('change',e=>{if(e.target.files[0])setFile(e.tar
 function isVideo(f){return f.type.startsWith('video/')||/\.(mp4|mov|mkv|avi|webm)$/i.test(f.name);}
 
 function setFile(f){
-  audioFile=f; isVideoFile=isVideo(f);
-  currentPcm=null; // Reseta PCM ao trocar de arquivo
+  audioFile=f; isVideoFile=isVideo(f); currentPcm=null;
   hideError(); $('heavy-banner').classList.remove('visible');
   const ext=f.name.split('.').pop().toLowerCase();
   const icons={mp3:'🎵',mp4:'🎬',wav:'🎵',m4a:'🎵',ogg:'🎵',webm:'🎬',mov:'🎬',mkv:'🎬',avi:'🎬'};
@@ -755,15 +739,11 @@ function setFile(f){
   $('file-name').textContent=f.name;
   $('file-size').textContent=formatBytes(f.size);
   $('file-info').classList.add('visible');
-  if(isVideoFile){
-    $('video-options').classList.add('visible');
-    $('extract-btn').disabled=false;
-  } else {
-    $('video-options').classList.remove('visible');
-  }
+  if(isVideoFile){$('video-options').classList.add('visible');$('extract-btn').disabled=false;}
+  else $('video-options').classList.remove('visible');
   const mode=detectMode(f);
   if(mode==='refuse'){
-    showError(`Arquivo muito grande (${formatBytes(f.size)}). Exporte apenas o áudio (MP3/M4A) ou divida em partes antes de enviar.`);
+    showError(`Arquivo muito grande (${formatBytes(f.size)}). Exporte apenas o áudio (MP3/M4A) ou divida em partes.`);
     audioFile=null; updateBtn(); return;
   }
   if(mode==='heavy'){
@@ -789,7 +769,7 @@ window.extractAudio=async function(){
   if(!audioFile)return;
   const btn=$('extract-btn'),prog=$('extract-progress');
   btn.disabled=true; btn.textContent='⏳ Carregando ffmpeg…';
-  prog.classList.add('visible'); prog.textContent='Carregando ffmpeg.wasm (apenas uma vez)…';
+  prog.classList.add('visible'); prog.textContent='Carregando ffmpeg.wasm…';
   try{
     const {FFmpeg}=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm');
     const {fetchFile,toBlobURL}=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm');
@@ -801,13 +781,11 @@ window.extractAudio=async function(){
       coreURL:await toBlobURL(`${baseURL}/ffmpeg-core.js`,'text/javascript'),
       wasmURL:await toBlobURL(`${baseURL}/ffmpeg-core.wasm`,'application/wasm')
     });
-    btn.textContent='⏳ Extraindo áudio…'; prog.textContent='Lendo arquivo…';
     await ffmpeg.writeFile('input',await fetchFile(audioFile));
     await ffmpeg.exec(['-i','input','-vn','-ac','1','-ar','16000','-q:a','4','output.ogg']);
     const data=await ffmpeg.readFile('output.ogg');
     const blob=new Blob([data.buffer],{type:'audio/ogg'});
-    const name=audioFile.name.replace(/\.[^.]+$/,'')+' _audio.ogg';
-    const extracted=new File([blob],name,{type:'audio/ogg'});
+    const extracted=new File([blob],audioFile.name.replace(/\.[^.]+$/,'')+' _audio.ogg',{type:'audio/ogg'});
     await ffmpeg.deleteFile('input'); await ffmpeg.deleteFile('output.ogg');
     prog.textContent=`✅ Áudio extraído: ${formatBytes(extracted.size)}`;
     btn.textContent='✅ Áudio extraído!';
@@ -830,16 +808,14 @@ window.toggleRecording=async function(){
       mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data);};
       mediaRecorder.onstop=()=>{
         const blob=new Blob(recordedChunks,{type:'audio/webm'});
-        const name='gravacao_'+new Date().toISOString().slice(0,19).replace(/:/g,'-')+'.webm';
-        setFile(new File([blob],name,{type:'audio/webm'}));
+        setFile(new File([blob],'gravacao_'+new Date().toISOString().slice(0,19).replace(/:/g,'-')+'.webm',{type:'audio/webm'}));
         stream.getTracks().forEach(t=>t.stop());
       };
       mediaRecorder.start();
       btn.classList.add('recording');
-      $('rec-icon').textContent='⏹️';
-      $('rec-label').textContent='Gravando… toque para parar';
+      $('rec-icon').textContent='⏹️'; $('rec-label').textContent='Gravando… toque para parar';
       startTimer();
-    }catch{alert('Permissão para microfone negada ou indisponível.');}
+    }catch{alert('Permissão para microfone negada.');}
   }else{
     mediaRecorder.stop(); btn.classList.remove('recording');
     $('rec-icon').textContent='🎙️'; $('rec-label').textContent='Toque para gravar';
@@ -859,10 +835,8 @@ function stopTimer(){clearInterval(timerInterval);$('timer').classList.remove('v
 window.startTranscription=async function(resumeFrom){
   if(!audioFile||!modelReady)return;
   cancelled=false;
-  if(!resumeFrom) {
-    // Nova transcrição do zero
-    chunksCompleted=0;
-    chunkTexts=[]; chunkStartTimes=[]; chunkEndTimes=[];
+  if(!resumeFrom){
+    chunksCompleted=0; chunkTexts=[]; chunkStartTimes=[]; chunkEndTimes=[];
     currentSessionId=null;
     $('chunks-log').innerHTML=''; $('chunks-log').classList.remove('visible');
     $('result-card').classList.remove('visible');
@@ -881,18 +855,14 @@ window.startTranscription=async function(resumeFrom){
     currentLang=$('lang-select').value==='auto'?null:$('lang-select').value;
     currentChunkSec=parseInt($('chunk-select').value,10);
     currentOverlap=currentChunkSec>=600?2:5;
-    showProgress('Enviando para Worker…',15);
     const pcmCopy=pcm.slice(0);
-    currentPcm=pcmCopy; // Guarda referência para retomada
+    currentPcm=pcmCopy;
     audioCtx.close();
+    showProgress('Enviando para Worker…',15);
     worker.postMessage({
-      type:'transcribe',
-      pcm:pcmCopy,
-      language:currentLang,
-      chunkSeconds:currentChunkSec,
-      overlapSeconds:currentOverlap,
-      sampleRate:16000,
-      resumeFrom: resumeFrom||null,
+      type:'transcribe', pcm:pcmCopy, language:currentLang,
+      chunkSeconds:currentChunkSec, overlapSeconds:currentOverlap,
+      sampleRate:16000, resumeFrom:resumeFrom||null
     },[pcmCopy.buffer]);
   }catch(err){
     hideProgress();
@@ -905,22 +875,19 @@ window.startTranscription=async function(resumeFrom){
 
 window.cancelTranscription=function(){
   cancelled=true;
-  // Não termina o worker imediatamente — deixa o worker enviar 'paused' no próximo chunk
-  // Se o worker já foi terminado manualmente, cria novo
   worker.postMessage({type:'cancel'});
-  // Timeout de segurança: se em 3s não receber 'paused', faz hard reset
   setTimeout(()=>{
     if(cancelled){
       worker.terminate(); worker=newWorker();
       worker.addEventListener('message',handleWorkerMessage);
-      modelReady=false;
-      $('load-btn').disabled=false; $('load-btn').textContent='Carregar modelo';
+      modelReady=false; updateBtn();
+      $('load-btn').classList.remove('hidden');
+      $('load-btn').disabled=false; $('load-btn').textContent='Recarregar modelo';
       $('model-select').disabled=false;
       hideProgress();
       $('bg-notice').classList.remove('visible');
       $('cancel-btn').classList.remove('visible');
-      $('transcribe-btn').disabled=true;
-      setStatus('Cancelado — recarregue o modelo','error');
+      setStatus('Cancelado — clique em Recarregar modelo','error');
     }
   },3000);
   showToast('⏸️ Cancelando e salvando progresso…');
@@ -928,11 +895,11 @@ window.cancelTranscription=function(){
 
 window.toggleEdit=function(){
   editMode=!editMode;
-  const box=$('transcript-box'), btn=$('edit-btn'), hint=$('edit-hint');
+  const box=$('transcript-box'),btn=$('edit-btn'),hint=$('edit-hint');
   box.contentEditable=editMode?'true':'false';
   box.classList.toggle('editing',editMode);
   btn.textContent=editMode?'✅ Concluir':'✏️ Editar';
-  hint.textContent=editMode?'✏️ Modo edição ativo — clique em ✅ Concluir para salvar':'🔒 Somente leitura — clique em ✏️ Editar para modificar';
+  hint.textContent=editMode?'✏️ Modo edição ativo':'🔒 Somente leitura — clique em ✏️ Editar para modificar';
   if(editMode)box.focus();
   showToast(editMode?'✏️ Edição ativada':'✅ Edição encerrada');
 };
@@ -953,9 +920,8 @@ window.downloadSrt=function(){
   let srt='';
   if(chunkTexts.length>0&&chunkStartTimes.length>0){
     chunkTexts.forEach((t,i)=>{
-      if(!t||!t.trim())return;
-      const st=chunkStartTimes[i]??0;
-      const en=chunkEndTimes[i]??(st+300);
+      if(!t?.trim())return;
+      const st=chunkStartTimes[i]??0, en=chunkEndTimes[i]??(st+300);
       srt+=`${i+1}\n${toSrtTime(st)} --> ${toSrtTime(en)}\n${t.trim()}\n\n`;
     });
   } else {
@@ -969,8 +935,7 @@ window.downloadSrt=function(){
 };
 
 function toSrtTime(s){
-  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=Math.floor(s%60);
-  const ms=Math.floor((s-Math.floor(s))*1000);
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=Math.floor(s%60),ms=Math.floor((s-Math.floor(s))*1000);
   return `${pad(h)}:${pad(m)}:${pad(ss)},${String(ms).padStart(3,'0')}`;
 }
 function pad(n){return String(n).padStart(2,'0');}
@@ -979,8 +944,6 @@ window.clearResult=function(){
   $('result-card').classList.remove('visible');
   $('chunks-log').innerHTML=''; $('chunks-log').classList.remove('visible');
 };
-
-setStatus('Clique em "Carregar modelo" para começar');
 </script>
 </body>
 </html>
