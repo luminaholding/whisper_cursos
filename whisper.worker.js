@@ -1,10 +1,14 @@
-// whisper.worker.js — roda em background, não bloqueia a UI
+// whisper.worker.js — roda em background, nao bloqueia a UI
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
 
 env.allowLocalModels = false;
 
 let transcriber = null;
 let isCancelled = false;
+
+// Persistencia de estado para retomada
+// Guardamos no self (worker) o progresso parcial
+let resumeState = null; // { pcm, language, chunkSeconds, overlapSeconds, sampleRate, startChunk, fullText, chunkTexts, chunkStartTimes, chunkEndTimes }
 
 function post(data) { self.postMessage(data); }
 
@@ -32,10 +36,10 @@ async function loadModel(modelId) {
   }
 }
 
-// ── Transcrição em chunks, libera referências antigas ──────────────
-async function transcribe({ pcm, language, chunkSeconds, overlapSeconds, sampleRate }) {
+// ── Transcricao em chunks, com suporte a retomada ─────────────────
+async function transcribe({ pcm, language, chunkSeconds, overlapSeconds, sampleRate, resumeFrom }) {
   if (!transcriber) {
-    post({ type: 'error', message: 'Modelo não carregado' });
+    post({ type: 'error', message: 'Modelo nao carregado' });
     return;
   }
 
@@ -47,19 +51,43 @@ async function transcribe({ pcm, language, chunkSeconds, overlapSeconds, sampleR
   const totalSamples = pcm.length;
   const totalChunks  = Math.ceil((totalSamples - OVERLAP) / STRIDE);
 
-  let fullText = '';
+  // Se estamos retomando, restaura estado; senao comeca do zero
+  let startChunk  = 0;
+  let fullText    = '';
+  let chunkTexts  = new Array(totalChunks).fill('');
+  let chunkStartTimes = new Array(totalChunks).fill(0);
+  let chunkEndTimes   = new Array(totalChunks).fill(0);
 
-  for (let i = 0; i < totalChunks; i++) {
-    if (isCancelled) break;
+  if (resumeFrom && resumeFrom.startChunk > 0) {
+    startChunk      = resumeFrom.startChunk;
+    fullText        = resumeFrom.fullText || '';
+    chunkTexts      = resumeFrom.chunkTexts || chunkTexts;
+    chunkStartTimes = resumeFrom.chunkStartTimes || chunkStartTimes;
+    chunkEndTimes   = resumeFrom.chunkEndTimes   || chunkEndTimes;
+    post({ type: 'resume_started', fromChunk: startChunk, total: totalChunks });
+  }
+
+  // Salva referencia para permitir retomada posterior
+  resumeState = { language, chunkSeconds, overlapSeconds, sampleRate, startChunk, fullText, chunkTexts, chunkStartTimes, chunkEndTimes };
+
+  for (let i = startChunk; i < totalChunks; i++) {
+    if (isCancelled) {
+      // Ao cancelar, persiste o ponto exato onde parou
+      resumeState = { language, chunkSeconds, overlapSeconds, sampleRate,
+        startChunk: i, fullText, chunkTexts, chunkStartTimes, chunkEndTimes };
+      post({ type: 'paused', fromChunk: i, total: totalChunks, fullText, chunkTexts, chunkStartTimes, chunkEndTimes });
+      break;
+    }
 
     const start = i * STRIDE;
     const end   = Math.min(start + CHUNK_SIZE, totalSamples);
-
-    // Cópia isolada do bloco — permite que o GC colete partes já processadas
     const chunk = pcm.slice(start, end);
 
     const startSec = start / SR;
     const endSec   = end   / SR;
+
+    chunkStartTimes[i] = startSec;
+    chunkEndTimes[i]   = endSec;
 
     function fmt(sec) {
       const m = String(Math.floor(sec / 60)).padStart(2,'0');
@@ -79,15 +107,19 @@ async function transcribe({ pcm, language, chunkSeconds, overlapSeconds, sampleR
     });
 
     try {
-      const opts = {
-        task: 'transcribe',
-        return_timestamps: false
-      };
+      const opts = { task: 'transcribe', return_timestamps: false };
       if (language) opts.language = language;
 
       const result = await transcriber(chunk, opts);
       const text = result.text.trim();
-      fullText += (fullText ? ' ' : '') + text;
+
+      chunkTexts[i] = text;
+      fullText = chunkTexts.filter(Boolean).join(' ');
+
+      // Atualiza estado de retomada apos cada chunk concluido
+      resumeState = { language, chunkSeconds, overlapSeconds, sampleRate,
+        startChunk: i + 1, fullText, chunkTexts: [...chunkTexts],
+        chunkStartTimes: [...chunkStartTimes], chunkEndTimes: [...chunkEndTimes] };
 
       post({
         type: 'chunk_done',
@@ -103,12 +135,10 @@ async function transcribe({ pcm, language, chunkSeconds, overlapSeconds, sampleR
     } catch (err) {
       post({ type: 'chunk_error', chunk: i + 1, message: err.message });
     }
-
-    // Dica ao GC: solta referência do chunk processado
-    // (o pcm original ainda existe mas o slice já foi usado)
   }
 
   if (!isCancelled) {
+    resumeState = null; // Limpa ao concluir
     post({ type: 'done', text: fullText });
   }
 }
@@ -119,4 +149,6 @@ self.addEventListener('message', async (e) => {
   if (type === 'load')       await loadModel(data.modelId);
   if (type === 'transcribe') await transcribe(data);
   if (type === 'cancel')     isCancelled = true;
+  // Retorna estado atual para retomada (UI pode pedir a qualquer momento)
+  if (type === 'get_resume_state') post({ type: 'resume_state', state: resumeState });
 });
