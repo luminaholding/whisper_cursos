@@ -35,144 +35,79 @@
       border-radius: 99px; padding: 6px 14px;
       font-size: 0.8rem; color: var(--subtext); margin-bottom: 18px;
     }
-    #status-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: #f5a623; animation: pulse 1.5s infinite;
-    }
+    #status-dot { width: 8px; height: 8px; border-radius: 50%; background: #f5a623; animation: pulse 1.5s infinite; }
     #status-dot.ready { background: var(--success); animation: none; }
     #status-dot.error { background: var(--error); animation: none; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
     #heavy-banner {
       display: none; width: 100%; max-width: 680px;
       background: rgba(245,166,35,.1); border: 1px solid rgba(245,166,35,.35);
-      border-radius: 10px; padding: 11px 16px;
-      font-size: 0.82rem; color: #f5c842; margin-bottom: 12px;
+      border-radius: 10px; padding: 11px 16px; font-size: 0.82rem; color: #f5c842; margin-bottom: 12px;
     }
     #heavy-banner.visible { display: flex; align-items: flex-start; gap: 9px; }
     #error-banner {
       display: none; width: 100%; max-width: 680px;
       background: rgba(224,92,125,.1); border: 1px solid rgba(224,92,125,.35);
-      border-radius: 10px; padding: 11px 16px;
-      font-size: 0.82rem; color: var(--error); margin-bottom: 12px;
+      border-radius: 10px; padding: 11px 16px; font-size: 0.82rem; color: var(--error); margin-bottom: 12px;
     }
     #error-banner.visible { display: flex; align-items: flex-start; gap: 9px; }
-    #model-row {
-      display: flex; align-items: center; gap: 10px;
-      width: 100%; max-width: 680px; margin-bottom: 14px;
-    }
+    #model-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 680px; margin-bottom: 4px; }
     #model-row label { font-size: 0.82rem; color: var(--subtext); white-space: nowrap; }
-    #model-select {
-      flex:1; background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); padding: 7px 11px; font-size: 0.84rem; outline: none;
-    }
-    #load-btn {
-      padding: 7px 16px; border: none; border-radius: 8px;
-      background: var(--accent); color: #fff;
-      font-size: 0.84rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity .2s;
-    }
+    #model-select { flex:1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 11px; font-size: 0.84rem; outline: none; }
+    #load-btn { padding: 7px 16px; border: none; border-radius: 8px; background: var(--accent); color: #fff; font-size: 0.84rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity .2s; }
     #load-btn:disabled { opacity: .45; cursor: not-allowed; }
-    #model-progress-wrap { width: 100%; max-width: 680px; margin-bottom: 12px; display: none; }
+    #model-progress-wrap { width: 100%; max-width: 680px; margin-bottom: 8px; display: none; }
     #model-progress-wrap.visible { display: block; }
     #model-progress-label { font-size: 0.8rem; color: var(--subtext); margin-bottom: 6px; }
     #model-progress-bg { height: 5px; background: var(--card); border-radius: 99px; overflow: hidden; }
     #model-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 99px; transition: width .3s; }
-    #model-cache-badge { display: none; font-size: 0.75rem; color: var(--success); margin-top: 4px; }
+    #model-cache-badge { display: none; font-size: 0.75rem; color: var(--success); margin-bottom: 10px; }
     #model-cache-badge.visible { display: block; }
-    #chunk-row {
-      display: flex; align-items: center; gap: 10px;
-      width: 100%; max-width: 680px; margin-bottom: 14px;
-    }
+    #chunk-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 680px; margin-bottom: 14px; }
     #chunk-row label { font-size: 0.82rem; color: var(--subtext); white-space: nowrap; }
-    #chunk-select {
-      flex:1; background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); padding: 7px 11px; font-size: 0.84rem; outline: none;
-    }
-    .card {
-      width: 100%; max-width: 680px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 28px 24px; margin-bottom: 20px;
-    }
+    #chunk-select { flex:1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 11px; font-size: 0.84rem; outline: none; }
+    .card { width: 100%; max-width: 680px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; margin-bottom: 20px; }
     .tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--card); border-radius: 10px; padding: 4px; }
-    .tab {
-      flex:1; padding: 9px; border: none; border-radius: 8px;
-      background: transparent; color: var(--subtext);
-      cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all .2s;
-    }
+    .tab { flex:1; padding: 9px; border: none; border-radius: 8px; background: transparent; color: var(--subtext); cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all .2s; }
     .tab.active { background: var(--accent); color: #fff; }
     .panel { display: none; } .panel.active { display: block; }
-    #drop-zone {
-      border: 2px dashed var(--border); border-radius: var(--radius);
-      padding: 40px 20px; text-align: center; cursor: pointer;
-      transition: border-color .25s, background .25s;
-    }
+    #drop-zone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 40px 20px; text-align: center; cursor: pointer; transition: border-color .25s, background .25s; }
     #drop-zone:hover, #drop-zone.drag-over { border-color: var(--accent); background: rgba(124,106,247,.05); }
     #drop-zone svg { margin-bottom: 14px; opacity: .6; }
     #drop-zone p { color: var(--subtext); font-size: 0.9rem; }
     #drop-zone strong { color: var(--text); }
     #file-input { display: none; }
-    #file-info {
-      display: none; align-items: center; gap: 12px;
-      background: var(--card); border-radius: 10px;
-      padding: 12px 16px; margin-top: 14px; font-size: 0.88rem;
-    }
+    #file-info { display: none; align-items: center; gap: 12px; background: var(--card); border-radius: 10px; padding: 12px 16px; margin-top: 14px; font-size: 0.88rem; }
     #file-info.visible { display: flex; }
     #file-icon { font-size: 1.5rem; }
     #file-name { font-weight: 600; flex:1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #file-size { color: var(--subtext); }
     #remove-file { background: none; border: none; color: var(--error); cursor: pointer; font-size: 1.1rem; padding: 4px; }
-    #extract-btn {
-      display: none; width: 100%; margin-top: 12px; padding: 10px;
-      border: 1px solid var(--border); border-radius: 10px;
-      background: var(--card); color: var(--text);
-      font-size: 0.88rem; cursor: pointer; transition: border-color .2s;
-    }
-    #extract-btn.visible { display: block; }
+    #video-options { display: none; margin-top: 12px; }
+    #video-options.visible { display: block; }
+    .video-opt-info { background: rgba(91,134,229,.07); border: 1px solid rgba(91,134,229,.25); border-radius: 10px; padding: 12px 15px; font-size: 0.82rem; color: #90b4f7; margin-bottom: 10px; }
+    #extract-btn { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); font-size: 0.88rem; cursor: pointer; transition: border-color .2s; }
     #extract-btn:hover { border-color: var(--accent); }
     #extract-btn:disabled { opacity: .4; cursor: not-allowed; }
     #extract-progress { display: none; margin-top: 8px; font-size: 0.78rem; color: var(--subtext); }
     #extract-progress.visible { display: block; }
-    #rec-btn {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; gap: 10px; width: 100%; padding: 36px;
-      border: 2px dashed var(--border); border-radius: var(--radius);
-      background: transparent; color: var(--subtext);
-      cursor: pointer; font-size: 0.9rem; transition: all .2s;
-    }
+    #rec-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 36px; border: 2px dashed var(--border); border-radius: var(--radius); background: transparent; color: var(--subtext); cursor: pointer; font-size: 0.9rem; transition: all .2s; }
     #rec-btn:hover { border-color: var(--accent); color: var(--text); }
-    #rec-btn.recording {
-      border-color: var(--error); background: rgba(224,92,125,.05);
-      color: var(--error); animation: recPulse 1.2s infinite;
-    }
-    @keyframes recPulse {
-      0%,100%{box-shadow:0 0 0 0 rgba(224,92,125,0)}
-      50%{box-shadow:0 0 0 8px rgba(224,92,125,.15)}
-    }
+    #rec-btn.recording { border-color: var(--error); background: rgba(224,92,125,.05); color: var(--error); animation: recPulse 1.2s infinite; }
+    @keyframes recPulse { 0%,100%{box-shadow:0 0 0 0 rgba(224,92,125,0)} 50%{box-shadow:0 0 0 8px rgba(224,92,125,.15)} }
     #rec-icon { font-size: 2.4rem; }
     #timer { font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums; display: none; }
     #timer.visible { display: block; }
     .field-row { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
     label { font-size: 0.85rem; color: var(--subtext); white-space: nowrap; }
-    select {
-      flex:1; background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); padding: 8px 12px;
-      font-size: 0.88rem; outline: none;
-    }
+    select { flex:1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 8px 12px; font-size: 0.88rem; outline: none; }
     select:focus { border-color: var(--accent); }
     #btn-row { display: flex; gap: 10px; margin-top: 20px; }
-    #transcribe-btn {
-      flex: 1; padding: 14px; border: none; border-radius: var(--radius);
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer;
-      transition: opacity .2s, transform .1s;
-    }
+    #transcribe-btn { flex: 1; padding: 14px; border: none; border-radius: var(--radius); background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity .2s, transform .1s; }
     #transcribe-btn:hover { opacity: .9; }
     #transcribe-btn:active { transform: scale(.98); }
     #transcribe-btn:disabled { opacity: .45; cursor: not-allowed; }
-    #cancel-btn {
-      display: none; padding: 14px 18px; border: 1px solid var(--error);
-      border-radius: var(--radius); background: transparent;
-      color: var(--error); font-size: 0.9rem; font-weight: 600; cursor: pointer;
-    }
+    #cancel-btn { display: none; padding: 14px 18px; border: 1px solid var(--error); border-radius: var(--radius); background: transparent; color: var(--error); font-size: 0.9rem; font-weight: 600; cursor: pointer; }
     #cancel-btn.visible { display: block; }
     #progress-wrap { display: none; margin-top: 18px; }
     #progress-wrap.visible { display: block; }
@@ -181,87 +116,36 @@
     #eta-label { font-size: 0.78rem; color: var(--subtext); }
     #progress-bar-bg { height: 6px; background: var(--card); border-radius: 99px; overflow: hidden; }
     #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 99px; transition: width .4s; }
-    #chunks-log {
-      display: none; margin-top: 14px;
-      background: var(--card); border-radius: 10px;
-      padding: 10px 14px; max-height: 160px; overflow-y: auto;
-      font-size: 0.78rem; line-height: 1.7; color: var(--subtext);
-    }
+    #chunks-log { display: none; margin-top: 14px; background: var(--card); border-radius: 10px; padding: 10px 14px; max-height: 160px; overflow-y: auto; font-size: 0.78rem; line-height: 1.7; color: var(--subtext); }
     #chunks-log.visible { display: block; }
     .chunk-item.done { color: var(--success); }
     .chunk-item.processing { color: var(--accent); animation: pulse 1s infinite; }
     .chunk-item.err { color: var(--error); }
-    #bg-notice {
-      display: none; width: 100%; max-width: 680px;
-      background: rgba(76,175,136,.1); border: 1px solid rgba(76,175,136,.3);
-      border-radius: 10px; padding: 11px 16px;
-      font-size: 0.82rem; color: #6dcfaa; margin-bottom: 14px;
-    }
+    #bg-notice { display: none; width: 100%; max-width: 680px; background: rgba(76,175,136,.1); border: 1px solid rgba(76,175,136,.3); border-radius: 10px; padding: 11px 16px; font-size: 0.82rem; color: #6dcfaa; margin-bottom: 14px; }
     #bg-notice.visible { display: flex; align-items: center; gap: 9px; }
     #sessions-section { width: 100%; max-width: 680px; margin-bottom: 20px; }
-    #sessions-section h3 {
-      font-size: 0.9rem; color: var(--subtext); margin-bottom: 10px;
-      display: flex; align-items: center; justify-content: space-between;
-    }
+    #sessions-section h3 { font-size: 0.9rem; color: var(--subtext); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
     #clear-sessions-btn { background: none; border: none; color: var(--error); font-size: 0.78rem; cursor: pointer; }
-    .session-item {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; padding: 12px 16px; margin-bottom: 8px;
-      cursor: pointer; transition: border-color .2s;
-      display: flex; align-items: center; gap: 12px;
-    }
+    .session-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; transition: border-color .2s; display: flex; align-items: center; gap: 12px; }
     .session-item:hover { border-color: var(--accent); }
     .session-meta { flex:1; }
     .session-name { font-size: 0.88rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 350px; }
     .session-date { font-size: 0.75rem; color: var(--subtext); margin-top: 2px; }
     .session-del { background: none; border: none; color: var(--error); cursor: pointer; font-size: 1rem; padding: 4px; }
-    #result-card {
-      display: none; width: 100%; max-width: 680px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 24px;
-    }
+    #result-card { display: none; width: 100%; max-width: 680px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
     #result-card.visible { display: block; }
     .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
     .result-header h2 { font-size: 1rem; font-weight: 700; }
     .result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    .action-btn {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); padding: 6px 13px;
-      font-size: 0.8rem; cursor: pointer; transition: border-color .2s;
-    }
+    .action-btn { background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 6px 13px; font-size: 0.8rem; cursor: pointer; transition: border-color .2s; }
     .action-btn:hover { border-color: var(--accent); }
-    /* Resultado somente leitura por padrão */
-    #transcript-box {
-      background: var(--card); border-radius: 10px; padding: 16px;
-      font-size: 0.9rem; line-height: 1.7; color: var(--text);
-      max-height: 420px; overflow-y: auto;
-      white-space: pre-wrap; word-break: break-word;
-      outline: none; min-height: 80px;
-      user-select: text; /* permite selecionar/copiar mas não editar */
-    }
-    #transcript-box.editing {
-      border: 1px solid var(--accent);
-      background: #1e2236;
-    }
-    #edit-hint {
-      margin-top: 8px; font-size: 0.75rem; color: var(--subtext);
-      text-align: right; font-style: italic;
-    }
+    #transcript-box { background: var(--card); border-radius: 10px; padding: 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text); max-height: 420px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; outline: none; min-height: 80px; user-select: text; }
+    #transcript-box.editing { border: 1px solid var(--accent); background: #1e2236; }
+    #edit-hint { margin-top: 8px; font-size: 0.75rem; color: var(--subtext); text-align: right; font-style: italic; }
     #word-count { margin-top: 6px; font-size: 0.78rem; color: var(--subtext); text-align: right; }
-    #toast {
-      position: fixed; bottom: 24px; left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--card); border: 1px solid var(--border);
-      color: var(--text); padding: 10px 20px;
-      border-radius: 99px; font-size: 0.85rem;
-      transition: transform .3s; pointer-events: none; z-index: 999;
-    }
+    #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--card); border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 99px; font-size: 0.85rem; transition: transform .3s; pointer-events: none; z-index: 999; }
     #toast.show { transform: translateX(-50%) translateY(0); }
-    .info-box {
-      background: rgba(91,134,229,.07); border: 1px solid rgba(91,134,229,.25);
-      border-radius: 10px; padding: 13px 15px;
-      font-size: 0.81rem; color: #90b4f7; line-height: 1.6; margin-top: 16px;
-    }
+    .info-box { background: rgba(91,134,229,.07); border: 1px solid rgba(91,134,229,.25); border-radius: 10px; padding: 13px 15px; font-size: 0.81rem; color: #90b4f7; line-height: 1.6; margin-top: 16px; }
     .info-box strong { display: block; margin-bottom: 3px; }
   </style>
 </head>
@@ -279,12 +163,12 @@
 
 <div id="heavy-banner">
   <span>⚠️</span>
-  <div><strong>Modo pesado ativado</strong> — Arquivo grande detectado. Usando modelo menor e blocos de 10 min para não estourar memória. Evite fechar o app durante a transcrição.</div>
+  <div><strong>Modo pesado ativado</strong> — Arquivo grande detectado. Usando modelo menor e blocos maiores para não estourar RAM. Mantenha o app em primeiro plano.</div>
 </div>
 <div id="error-banner"><span>❌</span><span id="error-text"></span></div>
 <div id="bg-notice">
   <span>🔄</span>
-  <span>Processando em segundo plano — pode trocar de app, a transcrição continua!</span>
+  <span>Processando em background — pode trocar de app, mas mantenha a tela ligada para arquivos longos.</span>
 </div>
 
 <div id="model-row">
@@ -335,8 +219,16 @@
       <span id="file-size">—</span>
       <button id="remove-file" title="Remover">✕</button>
     </div>
-    <button id="extract-btn" onclick="extractAudio()" disabled>🎬 Extrair áudio do vídeo (ffmpeg)</button>
-    <div id="extract-progress"></div>
+    <!-- Opções para vídeo: transcrição direta OU extração de áudio -->
+    <div id="video-options">
+      <div class="video-opt-info">
+        📹 <strong>Arquivo de vídeo detectado</strong><br>
+        Arquivos pequenos podem ser transcritos diretamente.<br>
+        Para vídeos grandes, extraia o áudio primeiro com ffmpeg.
+      </div>
+      <button id="extract-btn" onclick="extractAudio()" disabled>🎬 Extrair áudio (ffmpeg) — para vídeos grandes</button>
+      <div id="extract-progress"></div>
+    </div>
   </div>
 
   <div id="panel-mic" class="panel">
@@ -375,8 +267,8 @@
   <div id="chunks-log"></div>
 
   <div class="info-box">
-    <strong>ℹ️ Roda em segundo plano</strong>
-    Web Worker — pode trocar de app ou minimizar. Para arquivos muito grandes, mantenha a tela ligada para garantir que o Android não suspenda o processamento.
+    <strong>ℹ️ Segundo plano</strong>
+    Web Worker ativo — pode trocar de app. Para arquivos muito longos, mantenha a tela ligada para evitar que o Android suspenda o processamento.
   </div>
 </div>
 
@@ -396,7 +288,6 @@
       <button class="action-btn" onclick="clearResult()">🗑️ Limpar</button>
     </div>
   </div>
-  <!-- Somente leitura por padrão; contentEditable ativado só ao clicar Editar -->
   <div id="transcript-box" contenteditable="false"></div>
   <div id="edit-hint">🔒 Somente leitura — clique em ✏️ Editar para modificar</div>
   <div id="word-count"></div>
@@ -407,7 +298,6 @@
 <script type="module">
 import { openDB } from 'https://cdn.jsdelivr.net/npm/idb@8/+esm';
 
-// Registra Service Worker (PWA)
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
@@ -502,7 +392,6 @@ function handleWorkerMessage(e) {
   }
   if(d.type==='model_error') {
     setStatus('Erro ao carregar modelo: '+d.message,'error');
-    $('model-progress-label').textContent='Falha no carregamento.';
     $('load-btn').disabled=false; $('load-btn').textContent='Tentar novamente';
     $('model-select').disabled=false;
   }
@@ -518,11 +407,13 @@ function handleWorkerMessage(e) {
     chunksCompleted++;
     logChunk(d.chunk,d.timeLabel,'done','✅');
     chunkTexts[d.chunk-1]=d.text;
-    $('transcript-box').textContent=d.fullText;
+    // Concatenar todos os chunks completos (não apenas fullText do worker)
+    const fullText=chunkTexts.filter(Boolean).join(' ');
+    $('transcript-box').textContent=fullText;
     $('result-card').classList.add('visible');
     showProgress(`Bloco ${d.chunk}/${d.total} concluído`,d.pct);
     updateEta(chunksCompleted,d.total);
-    autoSaveSession(d.fullText,false);
+    autoSaveSession(fullText,false);
   }
   if(d.type==='chunk_error') logChunk(d.chunk,'?','err','❌');
   if(d.type==='done') {
@@ -588,7 +479,6 @@ function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 window.deleteSession=async function(id,e){e.stopPropagation();await db.delete('sessions',id);renderSessions();};
 function loadSession(s){
   $('transcript-box').textContent=s.text;
-  // Garante modo leitura ao carregar sessão
   $('transcript-box').contentEditable='false';
   $('transcript-box').classList.remove('editing');
   $('edit-btn').textContent='✏️ Editar';
@@ -650,13 +540,12 @@ function setFile(f){
   $('file-name').textContent=f.name;
   $('file-size').textContent=formatBytes(f.size);
   $('file-info').classList.add('visible');
+  // Mostrar opções de vídeo mas NÃO bloquear transcrição direta
   if(isVideoFile){
-    $('extract-btn').classList.add('visible');
+    $('video-options').classList.add('visible');
     $('extract-btn').disabled=false;
-    $('extract-btn').textContent='🎬 Extrair áudio do vídeo (ffmpeg)';
-    $('extract-progress').classList.remove('visible');
   } else {
-    $('extract-btn').classList.remove('visible');
+    $('video-options').classList.remove('visible');
   }
   const mode=detectMode(f);
   if(mode==='refuse'){
@@ -677,8 +566,7 @@ $('remove-file').onclick=e=>{
   audioFile=null; isVideoFile=false;
   $('file-info').classList.remove('visible');
   $('file-input').value='';
-  $('extract-btn').classList.remove('visible');
-  $('extract-progress').classList.remove('visible');
+  $('video-options').classList.remove('visible');
   $('heavy-banner').classList.remove('visible');
   hideError(); updateBtn();
 };
@@ -710,9 +598,9 @@ window.extractAudio=async function(){
     prog.textContent=`✅ Áudio extraído: ${formatBytes(extracted.size)}`;
     btn.textContent='✅ Áudio extraído!';
     setFile(extracted); isVideoFile=false;
-    $('extract-btn').classList.remove('visible');
+    $('video-options').classList.remove('visible');
   }catch(err){
-    btn.disabled=false; btn.textContent='🎬 Extrair áudio do vídeo (ffmpeg)';
+    btn.disabled=false; btn.textContent='🎬 Extrair áudio (ffmpeg)';
     prog.textContent='❌ Erro: '+err.message;
     showError('Falha ao extrair áudio: '+err.message);
   }
@@ -756,7 +644,6 @@ function stopTimer(){clearInterval(timerInterval);$('timer').classList.remove('v
 
 window.startTranscription=async function(){
   if(!audioFile||!modelReady)return;
-  if(isVideoFile){showError('Este arquivo é um vídeo. Use o botão "Extrair áudio" primeiro.');return;}
   cancelled=false; chunksCompleted=0;
   chunkTexts=[]; chunkStartTimes=[]; chunkEndTimes=[];
   currentSessionId=null; transcriptionStartTime=Date.now();
@@ -775,7 +662,7 @@ window.startTranscription=async function(){
     const lang=$('lang-select').value==='auto'?null:$('lang-select').value;
     const chunkSeconds=parseInt($('chunk-select').value,10);
     const overlap=chunkSeconds>=600?2:5;
-    showProgress('Enviando para processamento em background…',15);
+    showProgress('Enviando para Worker…',15);
     const pcmCopy=pcm.slice(0);
     audioCtx.close();
     worker.postMessage({type:'transcribe',pcm:pcmCopy,language:lang,chunkSeconds,overlapSeconds:overlap,sampleRate:16000},[pcmCopy.buffer]);
@@ -802,12 +689,9 @@ window.cancelTranscription=function(){
   showToast('⚠️ Transcrição cancelada');
 };
 
-// ── Resultado: somente leitura por padrão ──────────────────────────
 window.toggleEdit=function(){
   editMode=!editMode;
-  const box=$('transcript-box');
-  const btn=$('edit-btn');
-  const hint=$('edit-hint');
+  const box=$('transcript-box'), btn=$('edit-btn'), hint=$('edit-hint');
   box.contentEditable=editMode?'true':'false';
   box.classList.toggle('editing',editMode);
   btn.textContent=editMode?'✅ Concluir':'✏️ Editar';
@@ -828,16 +712,21 @@ window.downloadTxt=function(){
   a.click();
 };
 
+// SRT com timestamps reais por chunk
 window.downloadSrt=function(){
   let srt='';
-  const texts=chunkTexts.length?chunkTexts:[$('transcript-box').textContent];
-  const starts=chunkStartTimes.length?chunkStartTimes:[0];
-  const ends=chunkEndTimes.length?chunkEndTimes:[texts[0].length];
-  texts.forEach((t,i)=>{
-    if(!t.trim())return;
-    const st=starts[i]||0,en=ends[i]||st+300;
-    srt+=`${i+1}\n${toSrtTime(st)} --> ${toSrtTime(en)}\n${t.trim()}\n\n`;
-  });
+  if(chunkTexts.length>0&&chunkStartTimes.length>0){
+    chunkTexts.forEach((t,i)=>{
+      if(!t||!t.trim())return;
+      const st=chunkStartTimes[i]??0;
+      const en=chunkEndTimes[i]??(st+300);
+      srt+=`${i+1}\n${toSrtTime(st)} --> ${toSrtTime(en)}\n${t.trim()}\n\n`;
+    });
+  } else {
+    // fallback: bloco único
+    const t=$('transcript-box').textContent;
+    srt=`1\n${toSrtTime(0)} --> ${toSrtTime(0)}\n${t.trim()}\n\n`;
+  }
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([srt],{type:'text/plain'}));
   a.download='transcricao_'+new Date().toISOString().slice(0,10)+'.srt';
