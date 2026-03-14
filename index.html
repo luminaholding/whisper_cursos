@@ -51,6 +51,27 @@
       border-radius: 10px; padding: 11px 16px; font-size: 0.82rem; color: var(--error); margin-bottom: 12px;
     }
     #error-banner.visible { display: flex; align-items: flex-start; gap: 9px; }
+    /* Banner de sessão pausada */
+    #resume-banner {
+      display: none; width: 100%; max-width: 680px;
+      background: rgba(124,106,247,.1); border: 1px solid rgba(124,106,247,.4);
+      border-radius: 10px; padding: 13px 16px; font-size: 0.83rem; color: #b0a4ff;
+      margin-bottom: 14px; flex-direction: column; gap: 10px;
+    }
+    #resume-banner.visible { display: flex; }
+    #resume-banner strong { color: var(--text); }
+    #resume-banner-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .resume-btn {
+      padding: 7px 16px; border: none; border-radius: 8px;
+      background: var(--accent); color: #fff;
+      font-size: 0.83rem; font-weight: 600; cursor: pointer; transition: opacity .2s;
+    }
+    .resume-btn:hover { opacity: .85; }
+    .resume-discard-btn {
+      padding: 7px 14px; border: 1px solid var(--border); border-radius: 8px;
+      background: transparent; color: var(--subtext);
+      font-size: 0.83rem; cursor: pointer;
+    }
     #model-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 680px; margin-bottom: 4px; }
     #model-row label { font-size: 0.82rem; color: var(--subtext); white-space: nowrap; }
     #model-select { flex:1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 11px; font-size: 0.84rem; outline: none; }
@@ -128,10 +149,12 @@
     #clear-sessions-btn { background: none; border: none; color: var(--error); font-size: 0.78rem; cursor: pointer; }
     .session-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; transition: border-color .2s; display: flex; align-items: center; gap: 12px; }
     .session-item:hover { border-color: var(--accent); }
+    .session-item.paused { border-color: rgba(124,106,247,.4); }
     .session-meta { flex:1; }
-    .session-name { font-size: 0.88rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 350px; }
+    .session-name { font-size: 0.88rem; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px; }
     .session-date { font-size: 0.75rem; color: var(--subtext); margin-top: 2px; }
     .session-del { background: none; border: none; color: var(--error); cursor: pointer; font-size: 1rem; padding: 4px; }
+    .session-resume-btn { padding: 5px 12px; border: none; border-radius: 7px; background: var(--accent); color: #fff; font-size: 0.75rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
     #result-card { display: none; width: 100%; max-width: 680px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
     #result-card.visible { display: block; }
     .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
@@ -159,6 +182,18 @@
 <div id="status-badge">
   <span id="status-dot"></span>
   <span id="status-text">Aguardando carregamento do modelo…</span>
+</div>
+
+<!-- Banner de retomada: aparece quando há sessão pausada salva -->
+<div id="resume-banner">
+  <div>
+    <strong>⏸️ Transcrição pausada encontrada</strong><br>
+    <span id="resume-banner-info">Você pode continuar de onde parou.</span>
+  </div>
+  <div id="resume-banner-btns">
+    <button class="resume-btn" onclick="resumePausedSession()">&#9654; Continuar transcrição</button>
+    <button class="resume-discard-btn" onclick="discardPausedSession()">Descartar</button>
+  </div>
 </div>
 
 <div id="heavy-banner">
@@ -219,7 +254,6 @@
       <span id="file-size">—</span>
       <button id="remove-file" title="Remover">✕</button>
     </div>
-    <!-- Opções para vídeo: transcrição direta OU extração de áudio -->
     <div id="video-options">
       <div class="video-opt-info">
         📹 <strong>Arquivo de vídeo detectado</strong><br>
@@ -267,8 +301,8 @@
   <div id="chunks-log"></div>
 
   <div class="info-box">
-    <strong>ℹ️ Segundo plano</strong>
-    Web Worker ativo — pode trocar de app. Para arquivos muito longos, mantenha a tela ligada para evitar que o Android suspenda o processamento.
+    <strong>ℹ️ Segundo plano + retomada automática</strong>
+    Web Worker ativo — pode trocar de app. Se a transcrição for interrompida (rede, suspendência, cancelamento), o progresso é salvo automaticamente e você pode continuar de onde parou.
   </div>
 </div>
 
@@ -302,8 +336,14 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
-const db = await openDB('whisper-cursos', 1, {
-  upgrade(db) { db.createObjectStore('sessions', { keyPath: 'id', autoIncrement: true }); }
+// DB v2: stores 'sessions' (concluídas) + 'paused_sessions' (pausadas/interrompidas)
+const db = await openDB('whisper-cursos', 2, {
+  upgrade(db, oldVersion) {
+    if (!db.objectStoreNames.contains('sessions'))
+      db.createObjectStore('sessions', { keyPath: 'id', autoIncrement: true });
+    if (!db.objectStoreNames.contains('paused_sessions'))
+      db.createObjectStore('paused_sessions', { keyPath: 'id', autoIncrement: true });
+  }
 });
 
 let worker = newWorker();
@@ -315,6 +355,8 @@ let cancelled = false, editMode = false;
 let chunkStartTimes = [], chunkEndTimes = [], chunkTexts = [];
 let transcriptionStartTime = 0, chunksCompleted = 0, totalChunks = 0;
 let currentSessionId = null;
+// Guarda PCM decodificado em memória para permitir retomada na mesma sessão
+let currentPcm = null, currentLang = null, currentChunkSec = 300, currentOverlap = 5;
 
 const $ = id => document.getElementById(id);
 
@@ -407,7 +449,6 @@ function handleWorkerMessage(e) {
     chunksCompleted++;
     logChunk(d.chunk,d.timeLabel,'done','✅');
     chunkTexts[d.chunk-1]=d.text;
-    // Concatenar todos os chunks completos (não apenas fullText do worker)
     const fullText=chunkTexts.filter(Boolean).join(' ');
     $('transcript-box').textContent=fullText;
     $('result-card').classList.add('visible');
@@ -416,6 +457,19 @@ function handleWorkerMessage(e) {
     autoSaveSession(fullText,false);
   }
   if(d.type==='chunk_error') logChunk(d.chunk,'?','err','❌');
+
+  // PAUSED: worker pausou (cancelamento, suspensão, erro de rede)
+  if(d.type==='paused') {
+    hideProgress();
+    $('bg-notice').classList.remove('visible');
+    $('cancel-btn').classList.remove('visible');
+    $('transcribe-btn').disabled = !audioFile || !modelReady;
+    setStatus(`Pausado no bloco ${d.fromChunk}/${d.total} — progresso salvo`,  'error');
+    showToast('⏸️ Pausado — progresso salvo!');
+    // Persiste estado no IndexedDB para retomada mesmo após fechar o app
+    savePausedSession(d);
+  }
+
   if(d.type==='done') {
     if(cancelled) return;
     hideProgress();
@@ -431,9 +485,132 @@ function handleWorkerMessage(e) {
     setStatus('Transcrição concluída ✓','ready');
     showToast('✅ Transcrição concluída!');
     autoSaveSession(text,true);
+    // Limpa sessão pausada (já concluída)
+    clearPausedSessionsForFile(audioFile?.name);
     sendNotification('✅ Transcrição concluída!','Abra o app para ver o resultado.');
   }
 }
+
+// ── Sessões pausadas ─────────────────────────────────────────────────
+let pendingPausedId = null; // id da sessão pausada aguardando retomada
+
+async function savePausedSession(pauseData) {
+  const name = audioFile?.name || 'Gravação';
+  // Salva PCM como ArrayBuffer para retomada posterior (inclusive após fechar o app)
+  const pcmBuffer = currentPcm ? currentPcm.buffer.slice(0) : null;
+  const record = {
+    name,
+    date: new Date().toISOString(),
+    fromChunk: pauseData.fromChunk,
+    total: pauseData.total,
+    fullText: pauseData.fullText || '',
+    chunkTexts: pauseData.chunkTexts || [],
+    chunkStartTimes: pauseData.chunkStartTimes || [],
+    chunkEndTimes: pauseData.chunkEndTimes || [],
+    language: currentLang,
+    chunkSeconds: currentChunkSec,
+    overlapSeconds: currentOverlap,
+    pcmBuffer, // ArrayBuffer do áudio decodificado
+  };
+  if(pendingPausedId) {
+    await db.put('paused_sessions', {...record, id: pendingPausedId});
+  } else {
+    pendingPausedId = await db.add('paused_sessions', record);
+  }
+  renderSessions();
+  checkForPausedSession();
+}
+
+async function checkForPausedSession() {
+  const all = await db.getAll('paused_sessions');
+  if(!all.length) { $('resume-banner').classList.remove('visible'); return; }
+  const latest = all[all.length-1];
+  pendingPausedId = latest.id;
+  const pct = latest.total ? Math.round((latest.fromChunk/latest.total)*100) : 0;
+  $('resume-banner-info').textContent =
+    `"${latest.name}" — ${pct}% concluído (bloco ${latest.fromChunk}/${latest.total}). Carregar o modelo e clicar em Continuar.`;
+  $('resume-banner').classList.add('visible');
+}
+
+window.resumePausedSession = async function() {
+  if(!pendingPausedId) return;
+  if(!modelReady) { showToast('⚠️ Carregue o modelo antes de continuar'); return; }
+  const record = await db.get('paused_sessions', pendingPausedId);
+  if(!record) return;
+
+  // Restaura estado local
+  chunkTexts       = record.chunkTexts || [];
+  chunkStartTimes  = record.chunkStartTimes || [];
+  chunkEndTimes    = record.chunkEndTimes || [];
+  currentLang      = record.language;
+  currentChunkSec  = record.chunkSeconds || 300;
+  currentOverlap   = record.overlapSeconds || 5;
+  cancelled        = false;
+  chunksCompleted  = record.fromChunk;
+  transcriptionStartTime = Date.now();
+
+  // Exibe progresso parcial já obtido
+  if(record.fullText) {
+    $('transcript-box').textContent = record.fullText;
+    $('result-card').classList.add('visible');
+  }
+
+  $('resume-banner').classList.remove('visible');
+  $('cancel-btn').classList.add('visible');
+  $('bg-notice').classList.add('visible');
+  showProgress(`Retomando do bloco ${record.fromChunk}/${record.total}…`, Math.round((record.fromChunk/record.total)*90));
+  setStatus(`Retomando transcrição do bloco ${record.fromChunk}…`);
+
+  // Usa PCM salvo se disponível, senão usa o PCM em memória
+  let pcm = currentPcm;
+  if(!pcm && record.pcmBuffer) {
+    pcm = new Float32Array(record.pcmBuffer);
+    currentPcm = pcm;
+  }
+  if(!pcm) {
+    showError('Não foi possível recuperar o áudio. Selecione o arquivo novamente e clique em Continuar.');
+    return;
+  }
+
+  const resumeFrom = {
+    startChunk:      record.fromChunk,
+    fullText:        record.fullText || '',
+    chunkTexts:      record.chunkTexts || [],
+    chunkStartTimes: record.chunkStartTimes || [],
+    chunkEndTimes:   record.chunkEndTimes || [],
+  };
+
+  const pcmCopy = pcm.slice(0);
+  worker.postMessage({
+    type: 'transcribe',
+    pcm: pcmCopy,
+    language: currentLang,
+    chunkSeconds: currentChunkSec,
+    overlapSeconds: currentOverlap,
+    sampleRate: 16000,
+    resumeFrom,
+  }, [pcmCopy.buffer]);
+};
+
+window.discardPausedSession = async function() {
+  if(!pendingPausedId) return;
+  await db.delete('paused_sessions', pendingPausedId);
+  pendingPausedId = null;
+  $('resume-banner').classList.remove('visible');
+  showToast('Sessão pausada descartada');
+  renderSessions();
+};
+
+async function clearPausedSessionsForFile(name) {
+  const all = await db.getAll('paused_sessions');
+  for(const s of all) if(s.name===name) await db.delete('paused_sessions', s.id);
+  pendingPausedId = null;
+  $('resume-banner').classList.remove('visible');
+  renderSessions();
+}
+
+// Verifica ao abrir o app
+checkForPausedSession();
 
 function markModelCached(id) {
   const c=JSON.parse(localStorage.getItem('cachedModels')||'[]');
@@ -456,43 +633,80 @@ async function autoSaveSession(text,completed) {
   }
   renderSessions();
 }
+
 async function renderSessions() {
-  const all=await db.getAll('sessions');
+  const [completed, paused] = await Promise.all([
+    db.getAll('sessions'),
+    db.getAll('paused_sessions'),
+  ]);
+  const all = [
+    ...paused.map(s=>({...s, _paused:true})),
+    ...completed,
+  ];
   if(!all.length){$('sessions-section').style.display='none';return;}
   $('sessions-section').style.display='block';
   $('sessions-list').innerHTML='';
   [...all].reverse().forEach(s=>{
     const div=document.createElement('div');
-    div.className='session-item';
-    const preview=s.text?s.text.slice(0,80)+'…':'(sem texto)';
+    div.className='session-item'+(s._paused?' paused':'');
+    const preview=s.text||s.fullText?((s.text||s.fullText).slice(0,70)+'…'):'(sem texto)';
+    const status=s._paused
+      ? `⏸️ Pausado ${Math.round((s.fromChunk/s.total)*100)}%`
+      : (s.completed?'✅':'⏳');
     div.innerHTML=`
       <div class="session-meta">
-        <div class="session-name">${s.completed?'✅':'⏳'} ${escHtml(s.name)}</div>
+        <div class="session-name">${status} ${escHtml(s.name)}</div>
         <div class="session-date">${new Date(s.date).toLocaleString('pt-BR')} — ${escHtml(preview)}</div>
       </div>
-      <button class="session-del" onclick="deleteSession(${s.id},event)" title="Excluir">🗑️</button>`;
-    div.addEventListener('click',e=>{if(e.target.closest('.session-del'))return;loadSession(s);});
+      ${s._paused
+        ? `<button class="session-resume-btn" onclick="loadAndResume(${s.id},event)">▶ Continuar</button>`
+        : ''}
+      <button class="session-del" onclick="deleteSession(${s.id},${!!s._paused},event)" title="Excluir">🗑️</button>`;
+    if(!s._paused) div.addEventListener('click',ev=>{if(ev.target.closest('.session-del'))return;loadSession(s);});
     $('sessions-list').appendChild(div);
   });
 }
+
 function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-window.deleteSession=async function(id,e){e.stopPropagation();await db.delete('sessions',id);renderSessions();};
+
+window.deleteSession=async function(id,isPaused,e){
+  e.stopPropagation();
+  const store=isPaused?'paused_sessions':'sessions';
+  await db.delete(store,id);
+  if(isPaused&&pendingPausedId===id){
+    pendingPausedId=null;
+    $('resume-banner').classList.remove('visible');
+  }
+  renderSessions();
+};
+
+// Clique em "Continuar" numa sessão pausada da lista
+window.loadAndResume=async function(id,e){
+  e.stopPropagation();
+  pendingPausedId=id;
+  await resumePausedSession();
+};
+
 function loadSession(s){
-  $('transcript-box').textContent=s.text;
+  $('transcript-box').textContent=s.text||s.fullText||'';
   $('transcript-box').contentEditable='false';
   $('transcript-box').classList.remove('editing');
   $('edit-btn').textContent='✏️ Editar';
   $('edit-hint').textContent='🔒 Somente leitura — clique em ✏️ Editar para modificar';
   editMode=false;
-  const words=s.text.trim().split(/\s+/).length;
-  $('word-count').textContent=`${words} palavras · ${s.text.length} caracteres (sessão salva)`;
+  const txt=s.text||s.fullText||'';
+  const words=txt.trim().split(/\s+/).length;
+  $('word-count').textContent=`${words} palavras · ${txt.length} caracteres (sessão salva)`;
   $('result-card').classList.add('visible');
   $('result-card').scrollIntoView({behavior:'smooth'});
 }
+
 window.clearAllSessions=async function(){
   if(!confirm('Apagar todas as transcrições salvas?'))return;
-  const all=await db.getAll('sessions');
-  for(const s of all)await db.delete('sessions',s.id);
+  for(const s of await db.getAll('sessions')) await db.delete('sessions',s.id);
+  for(const s of await db.getAll('paused_sessions')) await db.delete('paused_sessions',s.id);
+  pendingPausedId=null;
+  $('resume-banner').classList.remove('visible');
   renderSessions();
 };
 renderSessions();
@@ -533,6 +747,7 @@ function isVideo(f){return f.type.startsWith('video/')||/\.(mp4|mov|mkv|avi|webm
 
 function setFile(f){
   audioFile=f; isVideoFile=isVideo(f);
+  currentPcm=null; // Reseta PCM ao trocar de arquivo
   hideError(); $('heavy-banner').classList.remove('visible');
   const ext=f.name.split('.').pop().toLowerCase();
   const icons={mp3:'🎵',mp4:'🎬',wav:'🎵',m4a:'🎵',ogg:'🎵',webm:'🎬',mov:'🎬',mkv:'🎬',avi:'🎬'};
@@ -540,7 +755,6 @@ function setFile(f){
   $('file-name').textContent=f.name;
   $('file-size').textContent=formatBytes(f.size);
   $('file-info').classList.add('visible');
-  // Mostrar opções de vídeo mas NÃO bloquear transcrição direta
   if(isVideoFile){
     $('video-options').classList.add('visible');
     $('extract-btn').disabled=false;
@@ -563,7 +777,7 @@ function setFile(f){
 
 $('remove-file').onclick=e=>{
   e.stopPropagation();
-  audioFile=null; isVideoFile=false;
+  audioFile=null; isVideoFile=false; currentPcm=null;
   $('file-info').classList.remove('visible');
   $('file-input').value='';
   $('video-options').classList.remove('visible');
@@ -642,16 +856,21 @@ function startTimer(){
 }
 function stopTimer(){clearInterval(timerInterval);$('timer').classList.remove('visible');}
 
-window.startTranscription=async function(){
+window.startTranscription=async function(resumeFrom){
   if(!audioFile||!modelReady)return;
-  cancelled=false; chunksCompleted=0;
-  chunkTexts=[]; chunkStartTimes=[]; chunkEndTimes=[];
-  currentSessionId=null; transcriptionStartTime=Date.now();
+  cancelled=false;
+  if(!resumeFrom) {
+    // Nova transcrição do zero
+    chunksCompleted=0;
+    chunkTexts=[]; chunkStartTimes=[]; chunkEndTimes=[];
+    currentSessionId=null;
+    $('chunks-log').innerHTML=''; $('chunks-log').classList.remove('visible');
+    $('result-card').classList.remove('visible');
+  }
+  transcriptionStartTime=Date.now();
   hideError();
   $('transcribe-btn').disabled=true;
   $('cancel-btn').classList.add('visible');
-  $('chunks-log').innerHTML=''; $('chunks-log').classList.remove('visible');
-  $('result-card').classList.remove('visible');
   $('bg-notice').classList.add('visible');
   showProgress('Decodificando áudio…',10);
   try{
@@ -659,13 +878,22 @@ window.startTranscription=async function(){
     const audioCtx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
     const audioBuffer=await audioCtx.decodeAudioData(arrayBuffer);
     const pcm=audioBuffer.getChannelData(0);
-    const lang=$('lang-select').value==='auto'?null:$('lang-select').value;
-    const chunkSeconds=parseInt($('chunk-select').value,10);
-    const overlap=chunkSeconds>=600?2:5;
+    currentLang=$('lang-select').value==='auto'?null:$('lang-select').value;
+    currentChunkSec=parseInt($('chunk-select').value,10);
+    currentOverlap=currentChunkSec>=600?2:5;
     showProgress('Enviando para Worker…',15);
     const pcmCopy=pcm.slice(0);
+    currentPcm=pcmCopy; // Guarda referência para retomada
     audioCtx.close();
-    worker.postMessage({type:'transcribe',pcm:pcmCopy,language:lang,chunkSeconds,overlapSeconds:overlap,sampleRate:16000},[pcmCopy.buffer]);
+    worker.postMessage({
+      type:'transcribe',
+      pcm:pcmCopy,
+      language:currentLang,
+      chunkSeconds:currentChunkSec,
+      overlapSeconds:currentOverlap,
+      sampleRate:16000,
+      resumeFrom: resumeFrom||null,
+    },[pcmCopy.buffer]);
   }catch(err){
     hideProgress();
     $('bg-notice').classList.remove('visible');
@@ -677,16 +905,25 @@ window.startTranscription=async function(){
 
 window.cancelTranscription=function(){
   cancelled=true;
-  worker.terminate(); worker=newWorker();
-  worker.addEventListener('message',handleWorkerMessage);
-  modelReady=false; hideProgress();
-  $('bg-notice').classList.remove('visible');
-  $('cancel-btn').classList.remove('visible');
-  $('transcribe-btn').disabled=true;
-  setStatus('Cancelado — recarregue o modelo','error');
-  $('load-btn').disabled=false; $('load-btn').textContent='Carregar modelo';
-  $('model-select').disabled=false;
-  showToast('⚠️ Transcrição cancelada');
+  // Não termina o worker imediatamente — deixa o worker enviar 'paused' no próximo chunk
+  // Se o worker já foi terminado manualmente, cria novo
+  worker.postMessage({type:'cancel'});
+  // Timeout de segurança: se em 3s não receber 'paused', faz hard reset
+  setTimeout(()=>{
+    if(cancelled){
+      worker.terminate(); worker=newWorker();
+      worker.addEventListener('message',handleWorkerMessage);
+      modelReady=false;
+      $('load-btn').disabled=false; $('load-btn').textContent='Carregar modelo';
+      $('model-select').disabled=false;
+      hideProgress();
+      $('bg-notice').classList.remove('visible');
+      $('cancel-btn').classList.remove('visible');
+      $('transcribe-btn').disabled=true;
+      setStatus('Cancelado — recarregue o modelo','error');
+    }
+  },3000);
+  showToast('⏸️ Cancelando e salvando progresso…');
 };
 
 window.toggleEdit=function(){
@@ -712,7 +949,6 @@ window.downloadTxt=function(){
   a.click();
 };
 
-// SRT com timestamps reais por chunk
 window.downloadSrt=function(){
   let srt='';
   if(chunkTexts.length>0&&chunkStartTimes.length>0){
@@ -723,7 +959,6 @@ window.downloadSrt=function(){
       srt+=`${i+1}\n${toSrtTime(st)} --> ${toSrtTime(en)}\n${t.trim()}\n\n`;
     });
   } else {
-    // fallback: bloco único
     const t=$('transcript-box').textContent;
     srt=`1\n${toSrtTime(0)} --> ${toSrtTime(0)}\n${t.trim()}\n\n`;
   }
