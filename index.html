@@ -38,9 +38,6 @@
     #model-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 680px; margin-bottom: 4px; }
     #model-row label { font-size: 0.82rem; color: var(--subtext); white-space: nowrap; }
     #model-select { flex:1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 11px; font-size: 0.84rem; outline: none; }
-    #load-btn { padding: 7px 16px; border: none; border-radius: 8px; background: var(--accent); color: #fff; font-size: 0.84rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
-    #load-btn:disabled { opacity: .45; cursor: not-allowed; }
-    #load-btn.hidden { display: none; }
     #model-progress-wrap { width: 100%; max-width: 680px; margin-bottom: 8px; display: none; }
     #model-progress-wrap.visible { display: block; }
     #model-progress-label { font-size: 0.8rem; color: var(--subtext); margin-bottom: 6px; }
@@ -48,9 +45,6 @@
     #model-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg,var(--accent),var(--accent2)); border-radius: 99px; transition: width .3s; }
     #model-cache-badge { display: none; font-size: 0.75rem; color: var(--success); margin-bottom: 10px; }
     #model-cache-badge.visible { display: block; }
-    #chunk-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 680px; margin-bottom: 14px; }
-    #chunk-row label { font-size: 0.82rem; color: var(--subtext); white-space: nowrap; }
-    #chunk-select { flex:1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 11px; font-size: 0.84rem; outline: none; }
     .card { width: 100%; max-width: 680px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; margin-bottom: 20px; }
     .tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--card); border-radius: 10px; padding: 4px; }
     .tab { flex:1; padding: 9px; border: none; border-radius: 8px; background: transparent; color: var(--subtext); cursor: pointer; font-size: 0.88rem; font-weight: 600; transition: all .2s; }
@@ -170,22 +164,11 @@
     <option value="Xenova/whisper-small" selected>Small (~250 MB) — recomendado ✅</option>
     <option value="Xenova/whisper-medium">Medium (~770 MB) — mais preciso</option>
   </select>
-  <button id="load-btn" class="hidden" onclick="loadModel()">Carregar</button>
 </div>
 <div id="model-cache-badge">✓ Modelo em cache — carregamento rápido</div>
 <div id="model-progress-wrap">
   <div id="model-progress-label">Carregando modelo…</div>
   <div id="model-progress-bg"><div id="model-progress-bar"></div></div>
-</div>
-
-<div id="chunk-row">
-  <label for="chunk-select">Bloco de:</label>
-  <select id="chunk-select">
-    <option value="30" selected>30 segundos ✅ ideal Whisper</option>
-    <option value="60">1 minuto</option>
-    <option value="120">2 minutos</option>
-    <option value="180">3 minutos</option>
-  </select>
 </div>
 
 <div class="card">
@@ -319,13 +302,16 @@ const db = await openDB('whisper-cursos', 2, {
 let worker = newWorker();
 function newWorker() { return new Worker('./whisper.worker.js', { type: 'module' }); }
 
+const CHUNK_SEC = 30;
+const OVERLAP_SEC = 5;
+
 let modelReady = false, audioFile = null, isVideoFile = false, isTranscribing = false;
 let mediaRecorder = null, recordedChunks = [], timerInterval = null, seconds = 0;
 let cancelled = false, editMode = false;
 let chunkStartTimes = [], chunkEndTimes = [], chunkTexts = [];
 let transcriptionStartTime = 0, chunksCompleted = 0, totalChunks = 0;
 let currentSessionId = null;
-let currentPcm = null, currentSR = 16000, currentLang = null, currentChunkSec = 30, currentOverlap = 5;
+let currentPcm = null, currentSR = 16000, currentLang = null;
 let pendingTranscription = false;
 
 const $ = id => document.getElementById(id);
@@ -395,7 +381,6 @@ function handleWorkerMessage(e) {
     $('model-progress-label').textContent = 'Modelo carregado! ✓';
     setTimeout(() => $('model-progress-wrap').classList.remove('visible'), 1800);
     setStatus('Modelo pronto — pode transcrever! ✓', 'ready');
-    $('load-btn').classList.add('hidden');
     $('model-select').disabled = false;
     markModelCached($('model-select').value);
     updateBtn();
@@ -404,8 +389,7 @@ function handleWorkerMessage(e) {
   if (d.type === 'model_error') {
     modelReady = false;
     setStatus('Erro ao carregar modelo — verifique a conexão', 'error');
-    $('load-btn').classList.remove('hidden'); $('load-btn').disabled = false;
-    $('load-btn').textContent = 'Tentar novamente'; $('model-select').disabled = false;
+    $('model-select').disabled = false;
     pendingTranscription = false; updateBtn();
   }
   if (d.type === 'chunk_start') {
@@ -449,29 +433,28 @@ function handleWorkerMessage(e) {
   }
 }
 
-function autoLoadModel() {
-  const model = $('model-select').value;
-  setStatus(isModelCached(model) ? 'Carregando do cache…' : 'Baixando modelo (só na 1ª vez)…');
+function doLoadModel(modelId) {
+  modelReady = false; $('model-select').disabled = true;
+  setStatus(isModelCached(modelId) ? 'Carregando do cache…' : 'Baixando modelo (só na 1ª vez)…');
   $('model-progress-wrap').classList.add('visible');
   $('model-progress-bar').style.width = '5%';
-  $('model-progress-label').textContent = isModelCached(model) ? 'Carregando do cache local…' : 'Baixando modelo…';
-  worker.postMessage({ type: 'load', modelId: model });
+  $('model-progress-label').textContent = isModelCached(modelId) ? 'Carregando do cache local…' : 'Baixando modelo…';
+  worker.postMessage({ type: 'load', modelId });
   requestNotifPerm();
 }
-autoLoadModel();
 
+// Carrega automaticamente ao iniciar
+doLoadModel($('model-select').value);
+
+// Ao trocar o modelo: termina o worker atual, cria um novo e carrega automaticamente
 $('model-select').addEventListener('change', () => {
-  checkModelCache($('model-select').value); modelReady = false; updateBtn();
-  $('load-btn').classList.remove('hidden'); $('load-btn').disabled = false;
-  $('load-btn').textContent = 'Carregar'; setStatus('Modelo alterado — clique em Carregar', 'error');
+  worker.terminate();
+  worker = newWorker();
+  worker.addEventListener('message', handleWorkerMessage);
+  checkModelCache($('model-select').value);
+  updateBtn();
+  doLoadModel($('model-select').value);
 });
-window.loadModel = function () {
-  const model = $('model-select').value;
-  $('load-btn').disabled = true; $('model-select').disabled = true;
-  setStatus('Carregando modelo…'); $('model-progress-wrap').classList.add('visible');
-  $('model-progress-bar').style.width = '5%';
-  worker.postMessage({ type: 'load', modelId: model });
-};
 
 function isModelCached(id) { return JSON.parse(localStorage.getItem('cachedModels') || '[]').includes(id); }
 function markModelCached(id) {
@@ -492,7 +475,7 @@ async function savePausedSession(pauseData) {
   const record = { name, date: new Date().toISOString(), fromChunk: pauseData.fromChunk, total: pauseData.total,
     fullText: pauseData.fullText || '', chunkTexts: pauseData.chunkTexts || [],
     chunkStartTimes: pauseData.chunkStartTimes || [], chunkEndTimes: pauseData.chunkEndTimes || [],
-    language: currentLang, chunkSeconds: currentChunkSec, overlapSeconds: currentOverlap, sampleRate: currentSR, pcmBuffer };
+    language: currentLang, chunkSeconds: CHUNK_SEC, overlapSeconds: OVERLAP_SEC, sampleRate: currentSR, pcmBuffer };
   if (pendingPausedId) await db.put('paused_sessions', { ...record, id: pendingPausedId });
   else pendingPausedId = await db.add('paused_sessions', record);
   renderSessions(); checkForPausedSession();
@@ -514,8 +497,7 @@ window.resumePausedSession = async function () {
   const record = await db.get('paused_sessions', pendingPausedId);
   if (!record) return;
   chunkTexts = record.chunkTexts || []; chunkStartTimes = record.chunkStartTimes || []; chunkEndTimes = record.chunkEndTimes || [];
-  currentLang = record.language; currentChunkSec = record.chunkSeconds || 30;
-  currentOverlap = record.overlapSeconds || 5; currentSR = record.sampleRate || 16000;
+  currentLang = record.language; currentSR = record.sampleRate || 16000;
   cancelled = false; chunksCompleted = record.fromChunk; transcriptionStartTime = Date.now();
   if (record.fullText) { $('transcript-box').textContent = record.fullText; $('result-card').classList.add('visible'); }
   $('resume-banner').classList.remove('visible'); $('cancel-btn').classList.add('visible');
@@ -528,7 +510,7 @@ window.resumePausedSession = async function () {
   isTranscribing = true; await acquireWakeLock(); swTell('TRANSCRIPTION_STARTED');
   const pcmCopy = pcm.slice(0);
   worker.postMessage({ type: 'transcribe', pcm: pcmCopy, language: currentLang,
-    chunkSeconds: currentChunkSec, overlapSeconds: currentOverlap, sampleRate: currentSR,
+    chunkSeconds: CHUNK_SEC, overlapSeconds: OVERLAP_SEC, sampleRate: currentSR,
     resumeFrom: { startChunk: record.fromChunk, fullText: record.fullText || '',
       chunkTexts: record.chunkTexts || [], chunkStartTimes: record.chunkStartTimes || [], chunkEndTimes: record.chunkEndTimes || [] }
   }, [pcmCopy.buffer]);
@@ -733,20 +715,17 @@ async function _doTranscribe(resumeFrom) {
     const arrayBuffer = await audioFile.arrayBuffer();
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-    const realSR = audioBuffer.sampleRate;
-    currentSR = realSR;
+    currentSR = audioBuffer.sampleRate;
     const pcm = audioBuffer.getChannelData(0);
     currentLang = $('lang-select').value === 'auto' ? null : $('lang-select').value;
-    currentChunkSec = parseInt($('chunk-select').value, 10);
-    currentOverlap = 5; // sempre 5s de overlap
     const pcmCopy = pcm.slice(0);
     currentPcm = pcmCopy;
     audioCtx.close();
     showProgress('Enviando para Worker…', 15);
     worker.postMessage({
       type: 'transcribe', pcm: pcmCopy, language: currentLang,
-      chunkSeconds: currentChunkSec, overlapSeconds: currentOverlap,
-      sampleRate: realSR,
+      chunkSeconds: CHUNK_SEC, overlapSeconds: OVERLAP_SEC,
+      sampleRate: currentSR,
       resumeFrom: resumeFrom || null
     }, [pcmCopy.buffer]);
   } catch (err) {
@@ -763,10 +742,9 @@ window.cancelTranscription = function () {
       isTranscribing = false; releaseWakeLock(); swTell('TRANSCRIPTION_ENDED');
       worker.terminate(); worker = newWorker(); worker.addEventListener('message', handleWorkerMessage);
       modelReady = false; updateBtn();
-      $('load-btn').classList.remove('hidden'); $('load-btn').disabled = false;
-      $('load-btn').textContent = 'Recarregar modelo'; $('model-select').disabled = false;
+      doLoadModel($('model-select').value);
       hideProgress(); $('bg-notice').classList.remove('visible'); $('cancel-btn').classList.remove('visible');
-      setStatus('Cancelado — clique em Recarregar modelo', 'error');
+      setStatus('Cancelado — recarregando modelo…', 'error');
     }
   }, 3000);
   showToast('⏸️ Cancelando…');
