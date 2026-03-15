@@ -15,58 +15,30 @@
       --border: #2e3354; --radius: 14px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: var(--bg); color: var(--text);
-      min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; padding: 24px 16px 80px;
-    }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px 80px; }
     header { width: 100%; max-width: 680px; text-align: center; margin-bottom: 24px; }
-    header h1 {
-      font-size: 1.9rem; font-weight: 700;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      margin-bottom: 6px;
-    }
+    header h1 { font-size: 1.9rem; font-weight: 700; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 6px; }
     header p { color: var(--subtext); font-size: 0.92rem; }
-    #status-badge {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 99px; padding: 6px 14px;
-      font-size: 0.8rem; color: var(--subtext); margin-bottom: 18px;
-    }
+    #status-badge { display: inline-flex; align-items: center; gap: 7px; background: var(--card); border: 1px solid var(--border); border-radius: 99px; padding: 6px 14px; font-size: 0.8rem; color: var(--subtext); margin-bottom: 18px; }
     #status-dot { width: 8px; height: 8px; border-radius: 50%; background: #f5a623; animation: pulse 1.5s infinite; }
     #status-dot.ready { background: var(--success); animation: none; }
     #status-dot.error { background: var(--error); animation: none; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-    #heavy-banner {
-      display: none; width: 100%; max-width: 680px;
-      background: rgba(245,166,35,.1); border: 1px solid rgba(245,166,35,.35);
-      border-radius: 10px; padding: 11px 16px; font-size: 0.82rem; color: #f5c842; margin-bottom: 12px;
-    }
-    #heavy-banner.visible { display: flex; align-items: flex-start; gap: 9px; }
-    #error-banner {
-      display: none; width: 100%; max-width: 680px;
-      background: rgba(224,92,125,.1); border: 1px solid rgba(224,92,125,.35);
-      border-radius: 10px; padding: 11px 16px; font-size: 0.82rem; color: var(--error); margin-bottom: 12px;
-    }
-    #error-banner.visible { display: flex; align-items: flex-start; gap: 9px; }
-    #resume-banner {
-      display: none; width: 100%; max-width: 680px;
-      background: rgba(124,106,247,.1); border: 1px solid rgba(124,106,247,.4);
-      border-radius: 10px; padding: 13px 16px; font-size: 0.83rem; color: #b0a4ff;
-      margin-bottom: 14px; flex-direction: column; gap: 10px;
-    }
+    .banner { display: none; width: 100%; max-width: 680px; border-radius: 10px; padding: 11px 16px; font-size: 0.82rem; margin-bottom: 12px; }
+    .banner.visible { display: flex; align-items: flex-start; gap: 9px; }
+    #heavy-banner { background: rgba(245,166,35,.1); border: 1px solid rgba(245,166,35,.35); color: #f5c842; }
+    #error-banner { background: rgba(224,92,125,.1); border: 1px solid rgba(224,92,125,.35); color: var(--error); }
+    #bg-notice { background: rgba(76,175,136,.1); border: 1px solid rgba(76,175,136,.3); color: #6dcfaa; }
+    #resume-banner { display: none; width: 100%; max-width: 680px; background: rgba(124,106,247,.1); border: 1px solid rgba(124,106,247,.4); border-radius: 10px; padding: 13px 16px; font-size: 0.83rem; color: #b0a4ff; margin-bottom: 14px; flex-direction: column; gap: 10px; }
     #resume-banner.visible { display: flex; }
     #resume-banner strong { color: var(--text); }
     #resume-banner-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-    .resume-btn { padding: 7px 16px; border: none; border-radius: 8px; background: var(--accent); color: #fff; font-size: 0.83rem; font-weight: 600; cursor: pointer; transition: opacity .2s; }
-    .resume-btn:hover { opacity: .85; }
+    .resume-btn { padding: 7px 16px; border: none; border-radius: 8px; background: var(--accent); color: #fff; font-size: 0.83rem; font-weight: 600; cursor: pointer; }
     .resume-discard-btn { padding: 7px 14px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--subtext); font-size: 0.83rem; cursor: pointer; }
     #model-row { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 680px; margin-bottom: 4px; }
     #model-row label { font-size: 0.82rem; color: var(--subtext); white-space: nowrap; }
     #model-select { flex:1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 11px; font-size: 0.84rem; outline: none; }
-    #load-btn { padding: 7px 16px; border: none; border-radius: 8px; background: var(--accent); color: #fff; font-size: 0.84rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: opacity .2s; }
+    #load-btn { padding: 7px 16px; border: none; border-radius: 8px; background: var(--accent); color: #fff; font-size: 0.84rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
     #load-btn:disabled { opacity: .45; cursor: not-allowed; }
     #load-btn.hidden { display: none; }
     #model-progress-wrap { width: 100%; max-width: 680px; margin-bottom: 8px; display: none; }
@@ -99,13 +71,11 @@
     #video-options { display: none; margin-top: 12px; }
     #video-options.visible { display: block; }
     .video-opt-info { background: rgba(91,134,229,.07); border: 1px solid rgba(91,134,229,.25); border-radius: 10px; padding: 12px 15px; font-size: 0.82rem; color: #90b4f7; margin-bottom: 10px; }
-    #extract-btn { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); font-size: 0.88rem; cursor: pointer; transition: border-color .2s; }
-    #extract-btn:hover { border-color: var(--accent); }
+    #extract-btn { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); color: var(--text); font-size: 0.88rem; cursor: pointer; }
     #extract-btn:disabled { opacity: .4; cursor: not-allowed; }
     #extract-progress { display: none; margin-top: 8px; font-size: 0.78rem; color: var(--subtext); }
     #extract-progress.visible { display: block; }
     #rec-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 36px; border: 2px dashed var(--border); border-radius: var(--radius); background: transparent; color: var(--subtext); cursor: pointer; font-size: 0.9rem; transition: all .2s; }
-    #rec-btn:hover { border-color: var(--accent); color: var(--text); }
     #rec-btn.recording { border-color: var(--error); background: rgba(224,92,125,.05); color: var(--error); animation: recPulse 1.2s infinite; }
     @keyframes recPulse { 0%,100%{box-shadow:0 0 0 0 rgba(224,92,125,0)} 50%{box-shadow:0 0 0 8px rgba(224,92,125,.15)} }
     #rec-icon { font-size: 2.4rem; }
@@ -114,11 +84,8 @@
     .field-row { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
     label { font-size: 0.85rem; color: var(--subtext); white-space: nowrap; }
     select { flex:1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 8px 12px; font-size: 0.88rem; outline: none; }
-    select:focus { border-color: var(--accent); }
     #btn-row { display: flex; gap: 10px; margin-top: 20px; }
-    #transcribe-btn { flex: 1; padding: 14px; border: none; border-radius: var(--radius); background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity .2s, transform .1s; }
-    #transcribe-btn:hover { opacity: .9; }
-    #transcribe-btn:active { transform: scale(.98); }
+    #transcribe-btn { flex: 1; padding: 14px; border: none; border-radius: var(--radius); background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 1rem; font-weight: 700; cursor: pointer; transition: opacity .2s; }
     #transcribe-btn:disabled { opacity: .45; cursor: not-allowed; }
     #cancel-btn { display: none; padding: 14px 18px; border: 1px solid var(--error); border-radius: var(--radius); background: transparent; color: var(--error); font-size: 0.9rem; font-weight: 600; cursor: pointer; }
     #cancel-btn.visible { display: block; }
@@ -134,8 +101,6 @@
     .chunk-item.done { color: var(--success); }
     .chunk-item.processing { color: var(--accent); animation: pulse 1s infinite; }
     .chunk-item.err { color: var(--error); }
-    #bg-notice { display: none; width: 100%; max-width: 680px; background: rgba(76,175,136,.1); border: 1px solid rgba(76,175,136,.3); border-radius: 10px; padding: 11px 16px; font-size: 0.82rem; color: #6dcfaa; margin-bottom: 14px; }
-    #bg-notice.visible { display: flex; align-items: center; gap: 9px; }
     #sessions-section { width: 100%; max-width: 680px; margin-bottom: 20px; }
     #sessions-section h3 { font-size: 0.9rem; color: var(--subtext); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
     #clear-sessions-btn { background: none; border: none; color: var(--error); font-size: 0.78rem; cursor: pointer; }
@@ -152,7 +117,7 @@
     .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
     .result-header h2 { font-size: 1rem; font-weight: 700; }
     .result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    .action-btn { background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 6px 13px; font-size: 0.8rem; cursor: pointer; transition: border-color .2s; }
+    .action-btn { background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 6px 13px; font-size: 0.8rem; cursor: pointer; }
     .action-btn:hover { border-color: var(--accent); }
     #transcript-box { background: var(--card); border-radius: 10px; padding: 16px; font-size: 0.9rem; line-height: 1.7; color: var(--text); max-height: 420px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; outline: none; min-height: 80px; user-select: text; }
     #transcript-box.editing { border: 1px solid var(--accent); background: #1e2236; }
@@ -182,19 +147,19 @@
     <span id="resume-banner-info">Você pode continuar de onde parou.</span>
   </div>
   <div id="resume-banner-btns">
-    <button class="resume-btn" onclick="resumePausedSession()">&#9654; Continuar transcrição</button>
+    <button class="resume-btn" onclick="resumePausedSession()">&#9654; Continuar</button>
     <button class="resume-discard-btn" onclick="discardPausedSession()">Descartar</button>
   </div>
 </div>
 
-<div id="heavy-banner">
+<div id="heavy-banner" class="banner">
   <span>⚠️</span>
-  <div><strong>Modo pesado ativado</strong> — Arquivo grande detectado. Usando modelo menor e blocos maiores para não estourar RAM. Mantenha o app em primeiro plano.</div>
+  <div><strong>Modo pesado</strong> — arquivo grande. Usando modelo menor e blocos maiores.</div>
 </div>
-<div id="error-banner"><span>❌</span><span id="error-text"></span></div>
-<div id="bg-notice">
+<div id="error-banner" class="banner"><span>❌</span><span id="error-text"></span></div>
+<div id="bg-notice" class="banner">
   <span>🔄</span>
-  <span>Processando em background — pode trocar de app. Progresso salvo automaticamente.</span>
+  <span id="bg-notice-text">Processando — progresso salvo automaticamente.</span>
 </div>
 
 <div id="model-row">
@@ -207,7 +172,7 @@
   </select>
   <button id="load-btn" class="hidden" onclick="loadModel()">Carregar</button>
 </div>
-<div id="model-cache-badge">✓ Modelo em cache local — carregamento rápido</div>
+<div id="model-cache-badge">✓ Modelo em cache — carregamento rápido</div>
 <div id="model-progress-wrap">
   <div id="model-progress-label">Carregando modelo…</div>
   <div id="model-progress-bg"><div id="model-progress-bar"></div></div>
@@ -219,7 +184,7 @@
     <option value="60">1 minuto — mais leve</option>
     <option value="180">3 minutos</option>
     <option value="300" selected>5 minutos ✅ recomendado</option>
-    <option value="600">10 minutos — menos divisões</option>
+    <option value="600">10 minutos</option>
   </select>
 </div>
 
@@ -247,11 +212,10 @@
     </div>
     <div id="video-options">
       <div class="video-opt-info">
-        📹 <strong>Arquivo de vídeo detectado</strong><br>
-        Arquivos pequenos podem ser transcritos diretamente.<br>
-        Para vídeos grandes, extraia o áudio primeiro com ffmpeg.
+        📹 <strong>Vídeo detectado</strong> — extraia o áudio antes para melhor resultado.
       </div>
-      <button id="extract-btn" onclick="extractAudio()" disabled>🎬 Extrair áudio (ffmpeg) — para vídeos grandes</button>
+      <!-- FIX ffmpeg: worker.js precisa ser blob da mesma origem para funcionar no mobile -->
+      <button id="extract-btn" onclick="extractAudio()" disabled>🎬 Extrair áudio (ffmpeg)</button>
       <div id="extract-progress"></div>
     </div>
   </div>
@@ -293,7 +257,7 @@
 
   <div class="info-box">
     <strong>ℹ️ Segundo plano + retomada automática</strong>
-    Web Worker ativo — pode trocar de app. Se a transcrição for interrompida, o progresso é salvo e você pode continuar de onde parou.
+    Web Worker ativo — pode trocar de app. Se interrompido, o progresso é salvo e você retoma de onde parou.
   </div>
 </div>
 
@@ -323,25 +287,28 @@
 <script type="module">
 import { openDB } from 'https://cdn.jsdelivr.net/npm/idb@8/+esm';
 
-// ── Service Worker + keepalive para segundo plano ────────────────────
-let swReg = null;
 if ('serviceWorker' in navigator) {
-  swReg = await navigator.serviceWorker.register('./sw.js').catch(() => null);
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
-
-// Responde ao ping do SW para manter canal aberto no Android
 navigator.serviceWorker?.addEventListener('message', e => {
-  if (e.data?.type === 'SW_KEEPALIVE') {
-    e.source?.postMessage({ type: 'SW_KEEPALIVE_ACK' });
+  if (e.data?.type === 'SW_KEEPALIVE')
     navigator.serviceWorker.controller?.postMessage({ type: 'SW_KEEPALIVE_ACK' });
-  }
+});
+function swTell(type) { navigator.serviceWorker?.controller?.postMessage({ type }); }
+
+// WakeLock — impede Android de suspender a aba durante transcrição
+let wakeLock = null;
+async function acquireWakeLock() {
+  if (!('wakeLock' in navigator)) return;
+  try { wakeLock = await navigator.wakeLock.request('screen'); } catch {}
+}
+async function releaseWakeLock() {
+  try { await wakeLock?.release(); wakeLock = null; } catch {}
+}
+document.addEventListener('visibilitychange', async () => {
+  if (document.visibilityState === 'visible' && isTranscribing) await acquireWakeLock();
 });
 
-function swTell(type) {
-  navigator.serviceWorker?.controller?.postMessage({ type });
-}
-
-// ── IndexedDB ───────────────────────────────────────────────────
 const db = await openDB('whisper-cursos', 2, {
   upgrade(db) {
     if (!db.objectStoreNames.contains('sessions'))
@@ -354,185 +321,164 @@ const db = await openDB('whisper-cursos', 2, {
 let worker = newWorker();
 function newWorker() { return new Worker('./whisper.worker.js', { type: 'module' }); }
 
-let modelReady = false, audioFile = null, isVideoFile = false;
+let modelReady = false, audioFile = null, isVideoFile = false, isTranscribing = false;
 let mediaRecorder = null, recordedChunks = [], timerInterval = null, seconds = 0;
 let cancelled = false, editMode = false;
 let chunkStartTimes = [], chunkEndTimes = [], chunkTexts = [];
 let transcriptionStartTime = 0, chunksCompleted = 0, totalChunks = 0;
 let currentSessionId = null;
-let currentPcm = null, currentLang = null, currentChunkSec = 300, currentOverlap = 5;
+let currentPcm = null, currentSR = 16000, currentLang = null, currentChunkSec = 300, currentOverlap = 5;
+let pendingTranscription = false;
 
 const $ = id => document.getElementById(id);
 
-function setStatus(t, s='loading') {
+function setStatus(t, s = 'loading') {
   $('status-text').textContent = t;
   const d = $('status-dot'); d.className = '';
-  if (s==='ready') d.classList.add('ready');
-  if (s==='error') d.classList.add('error');
+  if (s === 'ready') d.classList.add('ready');
+  if (s === 'error') d.classList.add('error');
 }
 function showToast(msg) {
-  const t=$('toast'); t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2800);
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
 }
-function showProgress(label,pct) {
+function showProgress(label, pct) {
   $('progress-wrap').classList.add('visible');
-  $('progress-label').textContent=label;
-  $('progress-bar').style.width=pct+'%';
+  $('progress-label').textContent = label;
+  $('progress-bar').style.width = pct + '%';
 }
 function hideProgress() {
   $('progress-wrap').classList.remove('visible');
-  $('progress-bar').style.width='0%';
-  $('eta-label').textContent='';
+  $('progress-bar').style.width = '0%';
+  $('eta-label').textContent = '';
 }
-function formatBytes(b) {
-  if(!b) return '—';
-  return b<1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB';
-}
-function updateBtn() { $('transcribe-btn').disabled = !audioFile || !modelReady; }
-function showError(msg) { $('error-text').textContent=msg; $('error-banner').classList.add('visible'); }
+function formatBytes(b) { return !b ? '—' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB'; }
+function updateBtn() { $('transcribe-btn').disabled = !audioFile; }
+function showError(msg) { $('error-text').textContent = msg; $('error-banner').classList.add('visible'); }
 function hideError() { $('error-banner').classList.remove('visible'); }
 
 function logChunk(id, label, cls, prefix) {
-  const log=$('chunks-log'); log.classList.add('visible');
-  let el=document.getElementById('ck-'+id);
-  if(!el){el=document.createElement('div');el.id='ck-'+id;el.className='chunk-item';log.appendChild(el);}
-  el.className='chunk-item '+cls;
-  el.textContent=prefix+' Bloco '+id+' ['+label+']';
-  log.scrollTop=log.scrollHeight;
+  const log = $('chunks-log'); log.classList.add('visible');
+  let el = document.getElementById('ck-' + id);
+  if (!el) { el = document.createElement('div'); el.id = 'ck-' + id; el.className = 'chunk-item'; log.appendChild(el); }
+  el.className = 'chunk-item ' + cls;
+  el.textContent = prefix + ' Bloco ' + id + ' [' + label + ']';
+  log.scrollTop = log.scrollHeight;
+}
+function updateEta(done, total) {
+  if (done < 1) return;
+  const elapsed = (Date.now() - transcriptionStartTime) / 1000;
+  const remaining = (total - done) * (elapsed / done);
+  const m = Math.floor(remaining / 60), s = Math.floor(remaining % 60);
+  $('eta-label').textContent = remaining > 5 ? `~${m > 0 ? m + ' min ' : ''}${s} s restantes` : 'Quase pronto…';
 }
 
-function updateEta(done,total) {
-  if(done<1) return;
-  const elapsed=(Date.now()-transcriptionStartTime)/1000;
-  const remaining=(total-done)*(elapsed/done);
-  const m=Math.floor(remaining/60), s=Math.floor(remaining%60);
-  $('eta-label').textContent = remaining>5 ? `~${m>0?m+' min ':''}${s} s restantes` : 'Quase pronto…';
-}
-
-const HEAVY=300*1024*1024, REFUSE=1.8*1024*1024*1024;
-function detectMode(f) { return f.size>REFUSE?'refuse':f.size>HEAVY?'heavy':'normal'; }
+const HEAVY = 300 * 1024 * 1024, REFUSE = 1.8 * 1024 * 1024 * 1024;
+function detectMode(f) { return f.size > REFUSE ? 'refuse' : f.size > HEAVY ? 'heavy' : 'normal'; }
 
 worker.addEventListener('message', handleWorkerMessage);
 
 function handleWorkerMessage(e) {
-  const d=e.data;
-  if(d.type==='model_progress') {
+  const d = e.data;
+  if (d.type === 'model_progress') {
     $('model-progress-wrap').classList.add('visible');
-    if(d.status==='downloading') {
-      const pct=d.total?Math.round((d.loaded/d.total)*90):50;
-      $('model-progress-bar').style.width=pct+'%';
-      $('model-progress-label').textContent=`Baixando modelo… ${formatBytes(d.loaded)} / ${formatBytes(d.total)}`;
-    } else if(d.status==='loading') {
-      $('model-progress-bar').style.width='95%';
-      $('model-progress-label').textContent='Carregando modelo na memória…';
+    if (d.status === 'downloading') {
+      const pct = d.total ? Math.round((d.loaded / d.total) * 90) : 50;
+      $('model-progress-bar').style.width = pct + '%';
+      $('model-progress-label').textContent = `Baixando… ${formatBytes(d.loaded)} / ${formatBytes(d.total)}`;
+    } else if (d.status === 'loading') {
+      $('model-progress-bar').style.width = '95%';
+      $('model-progress-label').textContent = 'Carregando modelo na memória…';
     }
   }
-  if(d.type==='model_ready') {
-    modelReady=true;
-    $('model-progress-bar').style.width='100%';
-    $('model-progress-label').textContent='Modelo carregado! ✓';
-    setTimeout(()=>$('model-progress-wrap').classList.remove('visible'),1800);
-    setStatus('Modelo pronto — pode transcrever! ✓','ready');
+  if (d.type === 'model_ready') {
+    modelReady = true;
+    $('model-progress-bar').style.width = '100%';
+    $('model-progress-label').textContent = 'Modelo carregado! ✓';
+    setTimeout(() => $('model-progress-wrap').classList.remove('visible'), 1800);
+    setStatus('Modelo pronto — pode transcrever! ✓', 'ready');
     $('load-btn').classList.add('hidden');
+    $('model-select').disabled = false;
     markModelCached($('model-select').value);
     updateBtn();
+    if (pendingTranscription) { pendingTranscription = false; _doTranscribe(); }
   }
-  if(d.type==='model_error') {
-    setStatus('Erro ao carregar modelo — verifique a conexão','error');
-    $('load-btn').classList.remove('hidden');
-    $('load-btn').disabled=false;
-    $('load-btn').textContent='Tentar novamente';
-    $('model-select').disabled=false;
+  if (d.type === 'model_error') {
+    modelReady = false;
+    setStatus('Erro ao carregar modelo — verifique a conexão', 'error');
+    $('load-btn').classList.remove('hidden'); $('load-btn').disabled = false;
+    $('load-btn').textContent = 'Tentar novamente'; $('model-select').disabled = false;
+    pendingTranscription = false; updateBtn();
   }
-  if(d.type==='chunk_start') {
-    totalChunks=d.total;
-    logChunk(d.chunk,d.timeLabel,'processing','⏳');
-    showProgress(`Transcrevendo bloco ${d.chunk}/${d.total} [${d.timeLabel}]…`,d.pct);
-    updateEta(chunksCompleted,d.total);
-    chunkStartTimes[d.chunk-1]=d.startSec;
-    chunkEndTimes[d.chunk-1]=d.endSec;
+  if (d.type === 'chunk_start') {
+    totalChunks = d.total;
+    logChunk(d.chunk, d.timeLabel, 'processing', '⏳');
+    showProgress(`Transcrevendo bloco ${d.chunk}/${d.total} [${d.timeLabel}]…`, d.pct);
+    updateEta(chunksCompleted, d.total);
+    chunkStartTimes[d.chunk - 1] = d.startSec; chunkEndTimes[d.chunk - 1] = d.endSec;
   }
-  if(d.type==='chunk_done') {
+  if (d.type === 'chunk_done') {
     chunksCompleted++;
-    logChunk(d.chunk,d.timeLabel,'done','✅');
-    chunkTexts[d.chunk-1]=d.text;
-    const fullText=chunkTexts.filter(Boolean).join(' ');
-    $('transcript-box').textContent=fullText;
+    logChunk(d.chunk, d.timeLabel, 'done', '✅');
+    chunkTexts[d.chunk - 1] = d.text;
+    const fullText = chunkTexts.filter(Boolean).join(' ');
+    $('transcript-box').textContent = fullText;
     $('result-card').classList.add('visible');
-    showProgress(`Bloco ${d.chunk}/${d.total} concluído`,d.pct);
-    updateEta(chunksCompleted,d.total);
-    autoSaveSession(fullText,false);
+    showProgress(`Bloco ${d.chunk}/${d.total} concluído`, d.pct);
+    updateEta(chunksCompleted, d.total);
+    autoSaveSession(fullText, false);
   }
-  if(d.type==='chunk_error') logChunk(d.chunk,'?','err','❌');
-  if(d.type==='paused') {
-    swTell('TRANSCRIPTION_ENDED'); // para keepalive
-    hideProgress();
-    $('bg-notice').classList.remove('visible');
-    $('cancel-btn').classList.remove('visible');
-    $('transcribe-btn').disabled = !audioFile || !modelReady;
-    setStatus(`Pausado no bloco ${d.fromChunk}/${d.total} — progresso salvo`,'error');
-    showToast('⏸️ Pausado — progresso salvo!');
-    savePausedSession(d);
+  if (d.type === 'chunk_error') logChunk(d.chunk, '?', 'err', '❌');
+  if (d.type === 'paused') {
+    isTranscribing = false; releaseWakeLock(); swTell('TRANSCRIPTION_ENDED');
+    hideProgress(); $('bg-notice').classList.remove('visible'); $('cancel-btn').classList.remove('visible');
+    updateBtn(); setStatus(`Pausado no bloco ${d.fromChunk}/${d.total} — progresso salvo`, 'error');
+    showToast('⏸️ Pausado — progresso salvo!'); savePausedSession(d);
   }
-  if(d.type==='done') {
-    if(cancelled) return;
-    swTell('TRANSCRIPTION_ENDED'); // para keepalive
-    hideProgress();
-    $('bg-notice').classList.remove('visible');
-    $('cancel-btn').classList.remove('visible');
-    $('transcribe-btn').disabled=false;
-    const text=d.text;
-    $('transcript-box').textContent=text;
-    const words=text.trim().split(/\s+/).length;
-    $('word-count').textContent=`${words} palavras · ${text.length} caracteres`;
+  if (d.type === 'done') {
+    if (cancelled) return;
+    isTranscribing = false; releaseWakeLock(); swTell('TRANSCRIPTION_ENDED');
+    hideProgress(); $('bg-notice').classList.remove('visible'); $('cancel-btn').classList.remove('visible');
+    updateBtn();
+    const text = d.text;
+    $('transcript-box').textContent = text;
+    $('word-count').textContent = `${text.trim().split(/\s+/).length} palavras · ${text.length} caracteres`;
     $('result-card').classList.add('visible');
-    $('result-card').scrollIntoView({behavior:'smooth',block:'start'});
-    setStatus('Transcrição concluída ✓','ready');
-    showToast('✅ Transcrição concluída!');
-    autoSaveSession(text,true);
-    clearPausedSessionsForFile(audioFile?.name);
-    sendNotification('✅ Transcrição concluída!','Abra o app para ver o resultado.');
+    $('result-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setStatus('Transcrição concluída ✓', 'ready'); showToast('✅ Transcrição concluída!');
+    autoSaveSession(text, true); clearPausedSessionsForFile(audioFile?.name);
+    sendNotification('✅ Transcrição concluída!', 'Abra o app para ver o resultado.');
   }
 }
 
-// ── Auto-load do modelo ao abrir o app ───────────────────────────────
 function autoLoadModel() {
   const model = $('model-select').value;
-  setStatus('Carregando modelo…');
+  setStatus(isModelCached(model) ? 'Carregando do cache…' : 'Baixando modelo (só na 1ª vez)…');
   $('model-progress-wrap').classList.add('visible');
-  $('model-progress-bar').style.width='5%';
-  $('model-progress-label').textContent = isModelCached(model)
-    ? 'Carregando do cache local…'
-    : 'Baixando modelo (apenas na 1ª vez)…';
-  worker.postMessage({type:'load', modelId: model});
+  $('model-progress-bar').style.width = '5%';
+  $('model-progress-label').textContent = isModelCached(model) ? 'Carregando do cache local…' : 'Baixando modelo…';
+  worker.postMessage({ type: 'load', modelId: model });
   requestNotifPerm();
 }
 autoLoadModel();
 
 $('model-select').addEventListener('change', () => {
-  checkModelCache($('model-select').value);
-  modelReady = false; updateBtn();
-  $('load-btn').classList.remove('hidden');
-  $('load-btn').disabled = false;
-  $('load-btn').textContent = 'Carregar';
-  setStatus('Modelo alterado — clique em Carregar','error');
+  checkModelCache($('model-select').value); modelReady = false; updateBtn();
+  $('load-btn').classList.remove('hidden'); $('load-btn').disabled = false;
+  $('load-btn').textContent = 'Carregar'; setStatus('Modelo alterado — clique em Carregar', 'error');
 });
-
-window.loadModel = function() {
+window.loadModel = function () {
   const model = $('model-select').value;
-  $('load-btn').disabled = true;
-  $('model-select').disabled = true;
-  setStatus('Carregando modelo…');
-  $('model-progress-wrap').classList.add('visible');
-  $('model-progress-bar').style.width='5%';
-  worker.postMessage({type:'load', modelId: model});
+  $('load-btn').disabled = true; $('model-select').disabled = true;
+  setStatus('Carregando modelo…'); $('model-progress-wrap').classList.add('visible');
+  $('model-progress-bar').style.width = '5%';
+  worker.postMessage({ type: 'load', modelId: model });
 };
 
-// ── Cache helpers ───────────────────────────────────────────────────
-function isModelCached(id) { return JSON.parse(localStorage.getItem('cachedModels')||'[]').includes(id); }
+function isModelCached(id) { return JSON.parse(localStorage.getItem('cachedModels') || '[]').includes(id); }
 function markModelCached(id) {
-  const c=JSON.parse(localStorage.getItem('cachedModels')||'[]');
-  if(!c.includes(id)){c.push(id);localStorage.setItem('cachedModels',JSON.stringify(c));}
+  const c = JSON.parse(localStorage.getItem('cachedModels') || '[]');
+  if (!c.includes(id)) { c.push(id); localStorage.setItem('cachedModels', JSON.stringify(c)); }
   $('model-cache-badge').classList.add('visible');
 }
 function checkModelCache(id) {
@@ -540,316 +486,338 @@ function checkModelCache(id) {
 }
 checkModelCache($('model-select').value);
 
-// ── Sessões pausadas ─────────────────────────────────────────────────
 let pendingPausedId = null;
 
 async function savePausedSession(pauseData) {
   const name = audioFile?.name || 'Gravação';
   const pcmBuffer = currentPcm ? currentPcm.buffer.slice(0) : null;
-  const record = { name, date: new Date().toISOString(),
-    fromChunk: pauseData.fromChunk, total: pauseData.total,
-    fullText: pauseData.fullText||'', chunkTexts: pauseData.chunkTexts||[],
-    chunkStartTimes: pauseData.chunkStartTimes||[], chunkEndTimes: pauseData.chunkEndTimes||[],
-    language: currentLang, chunkSeconds: currentChunkSec, overlapSeconds: currentOverlap, pcmBuffer };
-  if(pendingPausedId) await db.put('paused_sessions',{...record,id:pendingPausedId});
-  else pendingPausedId = await db.add('paused_sessions',record);
+  const record = { name, date: new Date().toISOString(), fromChunk: pauseData.fromChunk, total: pauseData.total,
+    fullText: pauseData.fullText || '', chunkTexts: pauseData.chunkTexts || [],
+    chunkStartTimes: pauseData.chunkStartTimes || [], chunkEndTimes: pauseData.chunkEndTimes || [],
+    language: currentLang, chunkSeconds: currentChunkSec, overlapSeconds: currentOverlap, sampleRate: currentSR, pcmBuffer };
+  if (pendingPausedId) await db.put('paused_sessions', { ...record, id: pendingPausedId });
+  else pendingPausedId = await db.add('paused_sessions', record);
   renderSessions(); checkForPausedSession();
 }
 
 async function checkForPausedSession() {
   const all = await db.getAll('paused_sessions');
-  if(!all.length){$('resume-banner').classList.remove('visible');return;}
-  const latest=all[all.length-1];
-  pendingPausedId=latest.id;
-  const pct=latest.total?Math.round((latest.fromChunk/latest.total)*100):0;
-  $('resume-banner-info').textContent=`"${latest.name}" — ${pct}% concluído (bloco ${latest.fromChunk}/${latest.total}).`;
+  if (!all.length) { $('resume-banner').classList.remove('visible'); return; }
+  const latest = all[all.length - 1];
+  pendingPausedId = latest.id;
+  const pct = latest.total ? Math.round((latest.fromChunk / latest.total) * 100) : 0;
+  $('resume-banner-info').textContent = `"${latest.name}" — ${pct}% concluído (bloco ${latest.fromChunk}/${latest.total}).`;
   $('resume-banner').classList.add('visible');
 }
 
-window.resumePausedSession = async function() {
-  if(!pendingPausedId) return;
-  if(!modelReady){showToast('⏳ Aguarde o modelo carregar…');return;}
-  const record=await db.get('paused_sessions',pendingPausedId);
-  if(!record) return;
-  chunkTexts=record.chunkTexts||[]; chunkStartTimes=record.chunkStartTimes||[]; chunkEndTimes=record.chunkEndTimes||[];
-  currentLang=record.language; currentChunkSec=record.chunkSeconds||300; currentOverlap=record.overlapSeconds||5;
-  cancelled=false; chunksCompleted=record.fromChunk; transcriptionStartTime=Date.now();
-  if(record.fullText){$('transcript-box').textContent=record.fullText;$('result-card').classList.add('visible');}
-  $('resume-banner').classList.remove('visible');
-  $('cancel-btn').classList.add('visible');
+window.resumePausedSession = async function () {
+  if (!pendingPausedId) return;
+  if (!modelReady) { showToast('⏳ Aguarde o modelo carregar…'); return; }
+  const record = await db.get('paused_sessions', pendingPausedId);
+  if (!record) return;
+  chunkTexts = record.chunkTexts || []; chunkStartTimes = record.chunkStartTimes || []; chunkEndTimes = record.chunkEndTimes || [];
+  currentLang = record.language; currentChunkSec = record.chunkSeconds || 300;
+  currentOverlap = record.overlapSeconds || 5; currentSR = record.sampleRate || 16000;
+  cancelled = false; chunksCompleted = record.fromChunk; transcriptionStartTime = Date.now();
+  if (record.fullText) { $('transcript-box').textContent = record.fullText; $('result-card').classList.add('visible'); }
+  $('resume-banner').classList.remove('visible'); $('cancel-btn').classList.add('visible');
   $('bg-notice').classList.add('visible');
-  showProgress(`Retomando do bloco ${record.fromChunk}/${record.total}…`,Math.round((record.fromChunk/record.total)*90));
+  showProgress(`Retomando do bloco ${record.fromChunk}/${record.total}…`, Math.round((record.fromChunk / record.total) * 90));
   setStatus(`Retomando transcrição do bloco ${record.fromChunk}…`);
-  let pcm=currentPcm;
-  if(!pcm&&record.pcmBuffer){pcm=new Float32Array(record.pcmBuffer);currentPcm=pcm;}
-  if(!pcm){showError('Não foi possível recuperar o áudio. Selecione o arquivo novamente.');return;}
-  swTell('TRANSCRIPTION_STARTED'); // keepalive
-  const pcmCopy=pcm.slice(0);
-  worker.postMessage({type:'transcribe',pcm:pcmCopy,language:currentLang,
-    chunkSeconds:currentChunkSec,overlapSeconds:currentOverlap,sampleRate:16000,
-    resumeFrom:{startChunk:record.fromChunk,fullText:record.fullText||'',
-      chunkTexts:record.chunkTexts||[],chunkStartTimes:record.chunkStartTimes||[],chunkEndTimes:record.chunkEndTimes||[]}},[pcmCopy.buffer]);
+  let pcm = currentPcm;
+  if (!pcm && record.pcmBuffer) { pcm = new Float32Array(record.pcmBuffer); currentPcm = pcm; }
+  if (!pcm) { showError('Não foi possível recuperar o áudio. Selecione o arquivo novamente.'); return; }
+  isTranscribing = true; await acquireWakeLock(); swTell('TRANSCRIPTION_STARTED');
+  const pcmCopy = pcm.slice(0);
+  worker.postMessage({ type: 'transcribe', pcm: pcmCopy, language: currentLang,
+    chunkSeconds: currentChunkSec, overlapSeconds: currentOverlap, sampleRate: currentSR,
+    resumeFrom: { startChunk: record.fromChunk, fullText: record.fullText || '',
+      chunkTexts: record.chunkTexts || [], chunkStartTimes: record.chunkStartTimes || [], chunkEndTimes: record.chunkEndTimes || [] }
+  }, [pcmCopy.buffer]);
 };
 
-window.discardPausedSession=async function(){
-  if(!pendingPausedId) return;
-  await db.delete('paused_sessions',pendingPausedId);
-  pendingPausedId=null; $('resume-banner').classList.remove('visible');
-  showToast('Sessão pausada descartada'); renderSessions();
+window.discardPausedSession = async function () {
+  if (!pendingPausedId) return;
+  await db.delete('paused_sessions', pendingPausedId);
+  pendingPausedId = null; $('resume-banner').classList.remove('visible');
+  showToast('Sessão descartada'); renderSessions();
 };
 
-async function clearPausedSessionsForFile(name){
-  const all=await db.getAll('paused_sessions');
-  for(const s of all) if(s.name===name) await db.delete('paused_sessions',s.id);
-  pendingPausedId=null; $('resume-banner').classList.remove('visible');
-  renderSessions();
+async function clearPausedSessionsForFile(name) {
+  const all = await db.getAll('paused_sessions');
+  for (const s of all) if (s.name === name) await db.delete('paused_sessions', s.id);
+  pendingPausedId = null; $('resume-banner').classList.remove('visible'); renderSessions();
 }
 checkForPausedSession();
 
-async function autoSaveSession(text,completed){
-  const name=audioFile?audioFile.name:'Gravação';
-  if(currentSessionId) await db.put('sessions',{id:currentSessionId,name,text,completed,date:new Date().toISOString()});
-  else currentSessionId=await db.add('sessions',{name,text,completed,date:new Date().toISOString()});
+async function autoSaveSession(text, completed) {
+  const name = audioFile ? audioFile.name : 'Gravação';
+  if (currentSessionId) await db.put('sessions', { id: currentSessionId, name, text, completed, date: new Date().toISOString() });
+  else currentSessionId = await db.add('sessions', { name, text, completed, date: new Date().toISOString() });
   renderSessions();
 }
 
-async function renderSessions(){
-  const [completed,paused]=await Promise.all([db.getAll('sessions'),db.getAll('paused_sessions')]);
-  const all=[...paused.map(s=>({...s,_paused:true})),...completed];
-  if(!all.length){$('sessions-section').style.display='none';return;}
-  $('sessions-section').style.display='block';
-  $('sessions-list').innerHTML='';
-  [...all].reverse().forEach(s=>{
-    const div=document.createElement('div');
-    div.className='session-item'+(s._paused?' paused':'');
-    const preview=(s.text||s.fullText||'').slice(0,70)+'…';
-    const status=s._paused?`⏸️ ${Math.round((s.fromChunk/s.total)*100)}%`:(s.completed?'✅':'⏳');
-    div.innerHTML=`<div class="session-meta"><div class="session-name">${status} ${escHtml(s.name)}</div><div class="session-date">${new Date(s.date).toLocaleString('pt-BR')} — ${escHtml(preview)}</div></div>${s._paused?`<button class="session-resume-btn" onclick="loadAndResume(${s.id},event)">▶ Continuar</button>`:''}<button class="session-del" onclick="deleteSession(${s.id},${!!s._paused},event)">🗑️</button>`;
-    if(!s._paused) div.addEventListener('click',ev=>{if(ev.target.closest('.session-del'))return;loadSession(s);});
+async function renderSessions() {
+  const [completed, paused] = await Promise.all([db.getAll('sessions'), db.getAll('paused_sessions')]);
+  const all = [...paused.map(s => ({ ...s, _paused: true })), ...completed];
+  if (!all.length) { $('sessions-section').style.display = 'none'; return; }
+  $('sessions-section').style.display = 'block';
+  $('sessions-list').innerHTML = '';
+  [...all].reverse().forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'session-item' + (s._paused ? ' paused' : '');
+    const preview = (s.text || s.fullText || '').slice(0, 70) + '…';
+    const status = s._paused ? `⏸️ ${Math.round((s.fromChunk / s.total) * 100)}%` : (s.completed ? '✅' : '⏳');
+    div.innerHTML = `<div class="session-meta"><div class="session-name">${status} ${escHtml(s.name)}</div><div class="session-date">${new Date(s.date).toLocaleString('pt-BR')} — ${escHtml(preview)}</div></div>${s._paused ? `<button class="session-resume-btn" onclick="loadAndResume(${s.id},event)">▶ Continuar</button>` : ''}<button class="session-del" onclick="deleteSession(${s.id},${!!s._paused},event)">🗑️</button>`;
+    if (!s._paused) div.addEventListener('click', ev => { if (ev.target.closest('.session-del')) return; loadSession(s); });
     $('sessions-list').appendChild(div);
   });
 }
-function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escHtml(t) { return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-window.deleteSession=async function(id,isPaused,e){
+window.deleteSession = async function (id, isPaused, e) {
   e.stopPropagation();
-  await db.delete(isPaused?'paused_sessions':'sessions',id);
-  if(isPaused&&pendingPausedId===id){pendingPausedId=null;$('resume-banner').classList.remove('visible');}
+  await db.delete(isPaused ? 'paused_sessions' : 'sessions', id);
+  if (isPaused && pendingPausedId === id) { pendingPausedId = null; $('resume-banner').classList.remove('visible'); }
   renderSessions();
 };
-window.loadAndResume=async function(id,e){
-  e.stopPropagation(); pendingPausedId=id; await resumePausedSession();
-};
-function loadSession(s){
-  const txt=s.text||s.fullText||'';
-  $('transcript-box').textContent=txt;
-  $('transcript-box').contentEditable='false';
-  $('transcript-box').classList.remove('editing');
-  $('edit-btn').textContent='✏️ Editar';
-  $('edit-hint').textContent='🔒 Somente leitura';
-  editMode=false;
-  $('word-count').textContent=`${txt.trim().split(/\s+/).length} palavras · ${txt.length} caracteres`;
-  $('result-card').classList.add('visible'); $('result-card').scrollIntoView({behavior:'smooth'});
+window.loadAndResume = async function (id, e) { e.stopPropagation(); pendingPausedId = id; await resumePausedSession(); };
+function loadSession(s) {
+  const txt = s.text || s.fullText || '';
+  $('transcript-box').textContent = txt; $('transcript-box').contentEditable = 'false';
+  $('transcript-box').classList.remove('editing'); $('edit-btn').textContent = '✏️ Editar';
+  $('edit-hint').textContent = '🔒 Somente leitura'; editMode = false;
+  $('word-count').textContent = `${txt.trim().split(/\s+/).length} palavras · ${txt.length} caracteres`;
+  $('result-card').classList.add('visible'); $('result-card').scrollIntoView({ behavior: 'smooth' });
 }
-window.clearAllSessions=async function(){
-  if(!confirm('Apagar todas as transcrições salvas?'))return;
-  for(const s of await db.getAll('sessions')) await db.delete('sessions',s.id);
-  for(const s of await db.getAll('paused_sessions')) await db.delete('paused_sessions',s.id);
-  pendingPausedId=null; $('resume-banner').classList.remove('visible'); renderSessions();
+window.clearAllSessions = async function () {
+  if (!confirm('Apagar todas as transcrições salvas?')) return;
+  for (const s of await db.getAll('sessions')) await db.delete('sessions', s.id);
+  for (const s of await db.getAll('paused_sessions')) await db.delete('paused_sessions', s.id);
+  pendingPausedId = null; $('resume-banner').classList.remove('visible'); renderSessions();
 };
 renderSessions();
 
-async function requestNotifPerm(){
-  if('Notification'in window&&Notification.permission==='default') await Notification.requestPermission();
+async function requestNotifPerm() {
+  if ('Notification' in window && Notification.permission === 'default') await Notification.requestPermission();
 }
-function sendNotification(title,body){
-  if('Notification'in window&&Notification.permission==='granted')
-    new Notification(title,{body,icon:'./icon-192.png'});
+function sendNotification(title, body) {
+  if ('Notification' in window && Notification.permission === 'granted')
+    new Notification(title, { body, icon: './icon-192.png' });
 }
 
-window.switchTab=function(tab){
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='upload')||(i===1&&tab==='mic')));
-  $('panel-upload').classList.toggle('active',tab==='upload');
-  $('panel-mic').classList.toggle('active',tab==='mic');
+window.switchTab = function (tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && tab === 'upload') || (i === 1 && tab === 'mic')));
+  $('panel-upload').classList.toggle('active', tab === 'upload');
+  $('panel-mic').classList.toggle('active', tab === 'mic');
 };
 
-const dz=$('drop-zone');
-dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
-dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
-dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');if(e.dataTransfer.files[0])setFile(e.dataTransfer.files[0]);});
-$('file-input').addEventListener('change',e=>{if(e.target.files[0])setFile(e.target.files[0]);});
+const dz = $('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]); });
+$('file-input').addEventListener('change', e => { if (e.target.files[0]) setFile(e.target.files[0]); });
 
-function isVideo(f){return f.type.startsWith('video/')||/\.(mp4|mov|mkv|avi|webm)$/i.test(f.name);}
-function setFile(f){
-  audioFile=f; isVideoFile=isVideo(f); currentPcm=null;
+function isVideo(f) { return f.type.startsWith('video/') || /\.(mp4|mov|mkv|avi|webm)$/i.test(f.name); }
+function setFile(f) {
+  audioFile = f; isVideoFile = isVideo(f); currentPcm = null;
   hideError(); $('heavy-banner').classList.remove('visible');
-  const ext=f.name.split('.').pop().toLowerCase();
-  const icons={mp3:'🎵',mp4:'🎬',wav:'🎵',m4a:'🎵',ogg:'🎵',webm:'🎬',mov:'🎬',mkv:'🎬',avi:'🎬'};
-  $('file-icon').textContent=icons[ext]||'📄';
-  $('file-name').textContent=f.name; $('file-size').textContent=formatBytes(f.size);
+  const ext = f.name.split('.').pop().toLowerCase();
+  const icons = { mp3: '🎵', mp4: '🎬', wav: '🎵', m4a: '🎵', ogg: '🎵', webm: '🎬', mov: '🎬', mkv: '🎬', avi: '🎬' };
+  $('file-icon').textContent = icons[ext] || '📄';
+  $('file-name').textContent = f.name; $('file-size').textContent = formatBytes(f.size);
   $('file-info').classList.add('visible');
-  if(isVideoFile){$('video-options').classList.add('visible');$('extract-btn').disabled=false;}
+  if (isVideoFile) { $('video-options').classList.add('visible'); $('extract-btn').disabled = false; }
   else $('video-options').classList.remove('visible');
-  const mode=detectMode(f);
-  if(mode==='refuse'){showError(`Arquivo muito grande (${formatBytes(f.size)}). Exporte o áudio ou divida em partes.`);audioFile=null;updateBtn();return;}
-  if(mode==='heavy'){
-    $('heavy-banner').classList.add('visible'); $('chunk-select').value='600';
-    const mv=$('model-select').value;
-    if(mv==='Xenova/whisper-medium'||mv==='Xenova/whisper-small')$('model-select').value='Xenova/whisper-base';
+  const mode = detectMode(f);
+  if (mode === 'refuse') { showError(`Arquivo muito grande (${formatBytes(f.size)}). Exporte o áudio ou divida em partes.`); audioFile = null; updateBtn(); return; }
+  if (mode === 'heavy') {
+    $('heavy-banner').classList.add('visible'); $('chunk-select').value = '600';
+    const mv = $('model-select').value;
+    if (mv === 'Xenova/whisper-medium' || mv === 'Xenova/whisper-small') $('model-select').value = 'Xenova/whisper-base';
   }
   updateBtn();
 }
-$('remove-file').onclick=e=>{
-  e.stopPropagation(); audioFile=null; isVideoFile=false; currentPcm=null;
-  $('file-info').classList.remove('visible'); $('file-input').value='';
+$('remove-file').onclick = e => {
+  e.stopPropagation(); audioFile = null; isVideoFile = false; currentPcm = null;
+  $('file-info').classList.remove('visible'); $('file-input').value = '';
   $('video-options').classList.remove('visible'); $('heavy-banner').classList.remove('visible');
   hideError(); updateBtn();
 };
 
-window.extractAudio=async function(){
-  if(!audioFile) return;
-  const btn=$('extract-btn'),prog=$('extract-progress');
-  btn.disabled=true; btn.textContent='⏳ Carregando ffmpeg…';
-  prog.classList.add('visible'); prog.textContent='Carregando ffmpeg.wasm…';
-  try{
-    const {FFmpeg}=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm');
-    const {fetchFile,toBlobURL}=await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm');
-    const ffmpeg=new FFmpeg();
-    ffmpeg.on('log',({message})=>{prog.textContent=message.slice(0,120);});
-    ffmpeg.on('progress',({progress})=>{prog.textContent=`Convertendo… ${Math.round(progress*100)}%`;});
-    const baseURL='https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm';
-    await ffmpeg.load({coreURL:await toBlobURL(`${baseURL}/ffmpeg-core.js`,'text/javascript'),wasmURL:await toBlobURL(`${baseURL}/ffmpeg-core.wasm`,'application/wasm')});
-    await ffmpeg.writeFile('input',await fetchFile(audioFile));
-    await ffmpeg.exec(['-i','input','-vn','-ac','1','-ar','16000','-q:a','4','output.ogg']);
-    const data=await ffmpeg.readFile('output.ogg');
-    const blob=new Blob([data.buffer],{type:'audio/ogg'});
-    const extracted=new File([blob],audioFile.name.replace(/\.[^.]+$/,'')+' _audio.ogg',{type:'audio/ogg'});
+// FIX ffmpeg: worker.js via toBlobURL para evitar erro de cross-origin no mobile
+window.extractAudio = async function () {
+  if (!audioFile) return;
+  const btn = $('extract-btn'), prog = $('extract-progress');
+  btn.disabled = true; btn.textContent = '⏳ Carregando ffmpeg…';
+  prog.classList.add('visible'); prog.textContent = 'Carregando ffmpeg.wasm…';
+  try {
+    const { FFmpeg } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/+esm');
+    const { fetchFile, toBlobURL } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/+esm');
+    const ffmpeg = new FFmpeg();
+    ffmpeg.on('log', ({ message }) => { prog.textContent = message.slice(0, 120); });
+    ffmpeg.on('progress', ({ progress }) => { prog.textContent = `Convertendo… ${Math.round(progress * 100)}%`; });
+    const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm';
+    // worker.js via toBlobURL — mesma origem, resolve o erro no Android/Samsung
+    const workerURL = await toBlobURL(
+      'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/worker.js',
+      'text/javascript'
+    );
+    await ffmpeg.load({
+      coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+      wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      workerURL
+    });
+    await ffmpeg.writeFile('input', await fetchFile(audioFile));
+    await ffmpeg.exec(['-i', 'input', '-vn', '-ac', '1', '-ar', '16000', '-q:a', '4', 'output.ogg']);
+    const data = await ffmpeg.readFile('output.ogg');
+    const blob = new Blob([data.buffer], { type: 'audio/ogg' });
+    const extracted = new File([blob], audioFile.name.replace(/\.[^.]+$/, '') + '_audio.ogg', { type: 'audio/ogg' });
     await ffmpeg.deleteFile('input'); await ffmpeg.deleteFile('output.ogg');
-    prog.textContent=`✅ Áudio extraído: ${formatBytes(extracted.size)}`;
-    btn.textContent='✅ Áudio extraído!';
-    setFile(extracted); isVideoFile=false; $('video-options').classList.remove('visible');
-  }catch(err){
-    btn.disabled=false; btn.textContent='🎬 Extrair áudio (ffmpeg)';
-    prog.textContent='❌ Erro: '+err.message; showError('Falha ao extrair áudio: '+err.message);
+    prog.textContent = `✅ Áudio extraído: ${formatBytes(extracted.size)}`;
+    btn.textContent = '✅ Áudio extraído!';
+    setFile(extracted); isVideoFile = false; $('video-options').classList.remove('visible');
+  } catch (err) {
+    btn.disabled = false; btn.textContent = '🎬 Extrair áudio (ffmpeg)';
+    prog.textContent = '❌ Erro: ' + err.message; showError('Falha ao extrair áudio: ' + err.message);
   }
 };
 
-window.toggleRecording=async function(){
-  const btn=$('rec-btn');
-  if(!mediaRecorder||mediaRecorder.state==='inactive'){
-    try{
-      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-      recordedChunks=[];
-      mediaRecorder=new MediaRecorder(stream);
-      mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data);};
-      mediaRecorder.onstop=()=>{
-        const blob=new Blob(recordedChunks,{type:'audio/webm'});
-        setFile(new File([blob],'gravacao_'+new Date().toISOString().slice(0,19).replace(/:/g,'-')+'.webm',{type:'audio/webm'}));
-        stream.getTracks().forEach(t=>t.stop());
+window.toggleRecording = async function () {
+  const btn = $('rec-btn');
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+        setFile(new File([blob], 'gravacao_' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.webm', { type: 'audio/webm' }));
+        stream.getTracks().forEach(t => t.stop());
       };
       mediaRecorder.start(); btn.classList.add('recording');
-      $('rec-icon').textContent='⏹️'; $('rec-label').textContent='Gravando… toque para parar';
+      $('rec-icon').textContent = '⏹️'; $('rec-label').textContent = 'Gravando… toque para parar';
       startTimer();
-    }catch{alert('Permissão para microfone negada.');}
-  }else{
+    } catch { alert('Permissão de microfone negada.'); }
+  } else {
     mediaRecorder.stop(); btn.classList.remove('recording');
-    $('rec-icon').textContent='🎙️'; $('rec-label').textContent='Toque para gravar';
+    $('rec-icon').textContent = '🎙️'; $('rec-label').textContent = 'Toque para gravar';
     stopTimer(); window.switchTab('upload');
   }
 };
-function startTimer(){
-  seconds=0; const el=$('timer'); el.classList.add('visible');
-  timerInterval=setInterval(()=>{seconds++;el.textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');},1000);
+function startTimer() {
+  seconds = 0; const el = $('timer'); el.classList.add('visible');
+  timerInterval = setInterval(() => { seconds++; el.textContent = String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0'); }, 1000);
 }
-function stopTimer(){clearInterval(timerInterval);$('timer').classList.remove('visible');}
+function stopTimer() { clearInterval(timerInterval); $('timer').classList.remove('visible'); }
 
-window.startTranscription=async function(resumeFrom){
-  if(!audioFile||!modelReady) return;
-  cancelled=false;
-  if(!resumeFrom){
-    chunksCompleted=0; chunkTexts=[]; chunkStartTimes=[]; chunkEndTimes=[];
-    currentSessionId=null;
-    $('chunks-log').innerHTML=''; $('chunks-log').classList.remove('visible');
+window.startTranscription = async function () {
+  if (!audioFile) return;
+  if (!modelReady) {
+    pendingTranscription = true;
+    setStatus('⏳ Aguardando modelo para transcrever…');
+    showToast('⏳ Modelo carregando, transcrição começa automaticamente!');
+    return;
+  }
+  _doTranscribe();
+};
+
+async function _doTranscribe(resumeFrom) {
+  cancelled = false;
+  if (!resumeFrom) {
+    chunksCompleted = 0; chunkTexts = []; chunkStartTimes = []; chunkEndTimes = [];
+    currentSessionId = null;
+    $('chunks-log').innerHTML = ''; $('chunks-log').classList.remove('visible');
     $('result-card').classList.remove('visible');
   }
-  transcriptionStartTime=Date.now(); hideError();
-  $('transcribe-btn').disabled=true; $('cancel-btn').classList.add('visible'); $('bg-notice').classList.add('visible');
-  showProgress('Decodificando áudio…',10);
-  swTell('TRANSCRIPTION_STARTED'); // keepalive
-  try{
-    const arrayBuffer=await audioFile.arrayBuffer();
-    const audioCtx=new(window.AudioContext||window.webkitAudioContext)({sampleRate:16000});
-    const audioBuffer=await audioCtx.decodeAudioData(arrayBuffer);
-    const pcm=audioBuffer.getChannelData(0);
-    currentLang=$('lang-select').value==='auto'?null:$('lang-select').value;
-    currentChunkSec=parseInt($('chunk-select').value,10);
-    currentOverlap=currentChunkSec>=600?2:5;
-    const pcmCopy=pcm.slice(0);
-    currentPcm=pcmCopy; audioCtx.close();
-    showProgress('Enviando para Worker…',15);
-    worker.postMessage({type:'transcribe',pcm:pcmCopy,language:currentLang,
-      chunkSeconds:currentChunkSec,overlapSeconds:currentOverlap,
-      sampleRate:16000,resumeFrom:resumeFrom||null},[pcmCopy.buffer]);
-  }catch(err){
-    swTell('TRANSCRIPTION_ENDED');
+  transcriptionStartTime = Date.now(); hideError();
+  $('transcribe-btn').disabled = true; $('cancel-btn').classList.add('visible');
+  $('bg-notice').classList.add('visible');
+  $('bg-notice-text').textContent = 'Processando — progresso salvo automaticamente.';
+  showProgress('Decodificando áudio…', 10);
+  isTranscribing = true; await acquireWakeLock(); swTell('TRANSCRIPTION_STARTED');
+  try {
+    const arrayBuffer = await audioFile.arrayBuffer();
+    // SR real do hardware — nao forca 16000 aqui
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    const realSR = audioBuffer.sampleRate;
+    currentSR = realSR;
+    const pcm = audioBuffer.getChannelData(0);
+    currentLang = $('lang-select').value === 'auto' ? null : $('lang-select').value;
+    currentChunkSec = parseInt($('chunk-select').value, 10);
+    currentOverlap = currentChunkSec >= 600 ? 2 : 5;
+    const pcmCopy = pcm.slice(0);
+    currentPcm = pcmCopy;
+    audioCtx.close();
+    showProgress('Enviando para Worker…', 15);
+    // Passa o SR REAL para o worker fazer resample correto para 16kHz
+    worker.postMessage({
+      type: 'transcribe', pcm: pcmCopy, language: currentLang,
+      chunkSeconds: currentChunkSec, overlapSeconds: currentOverlap,
+      sampleRate: realSR,
+      resumeFrom: resumeFrom || null
+    }, [pcmCopy.buffer]);
+  } catch (err) {
+    isTranscribing = false; releaseWakeLock(); swTell('TRANSCRIPTION_ENDED');
     hideProgress(); $('bg-notice').classList.remove('visible'); $('cancel-btn').classList.remove('visible');
-    $('transcribe-btn').disabled=false; showError('Erro ao decodificar áudio: '+err.message);
+    updateBtn(); showError('Erro ao decodificar áudio: ' + err.message);
   }
-};
-
-window.cancelTranscription=function(){
-  cancelled=true; worker.postMessage({type:'cancel'});
-  setTimeout(()=>{
-    if(cancelled){
-      worker.terminate(); worker=newWorker(); worker.addEventListener('message',handleWorkerMessage);
-      modelReady=false; updateBtn();
-      $('load-btn').classList.remove('hidden'); $('load-btn').disabled=false; $('load-btn').textContent='Recarregar modelo';
-      $('model-select').disabled=false; hideProgress();
-      $('bg-notice').classList.remove('visible'); $('cancel-btn').classList.remove('visible');
-      setStatus('Cancelado — clique em Recarregar modelo','error');
-      swTell('TRANSCRIPTION_ENDED');
-    }
-  },3000);
-  showToast('⏸️ Cancelando e salvando progresso…');
-};
-
-window.toggleEdit=function(){
-  editMode=!editMode;
-  const box=$('transcript-box'),btn=$('edit-btn'),hint=$('edit-hint');
-  box.contentEditable=editMode?'true':'false'; box.classList.toggle('editing',editMode);
-  btn.textContent=editMode?'✅ Concluir':'✏️ Editar';
-  hint.textContent=editMode?'✏️ Modo edição ativo':'🔒 Somente leitura — clique em ✏️ Editar para modificar';
-  if(editMode)box.focus();
-  showToast(editMode?'✏️ Edição ativada':'✅ Edição encerrada');
-};
-window.copyText=function(){
-  navigator.clipboard.writeText($('transcript-box').textContent).then(()=>showToast('Copiado! ✓')).catch(()=>showToast('Erro ao copiar'));
-};
-window.downloadTxt=function(){
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([$('transcript-box').textContent],{type:'text/plain'}));
-  a.download='transcricao_'+new Date().toISOString().slice(0,10)+'.txt'; a.click();
-};
-window.downloadSrt=function(){
-  let srt='';
-  if(chunkTexts.length>0&&chunkStartTimes.length>0){
-    chunkTexts.forEach((t,i)=>{
-      if(!t?.trim())return;
-      const st=chunkStartTimes[i]??0,en=chunkEndTimes[i]??(st+300);
-      srt+=`${i+1}\n${toSrtTime(st)} --> ${toSrtTime(en)}\n${t.trim()}\n\n`;
-    });
-  } else { const t=$('transcript-box').textContent; srt=`1\n${toSrtTime(0)} --> ${toSrtTime(0)}\n${t.trim()}\n\n`; }
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([srt],{type:'text/plain'}));
-  a.download='transcricao_'+new Date().toISOString().slice(0,10)+'.srt'; a.click();
-};
-function toSrtTime(s){
-  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),ss=Math.floor(s%60),ms=Math.floor((s-Math.floor(s))*1000);
-  return `${pad(h)}:${pad(m)}:${pad(ss)},${String(ms).padStart(3,'0')}`;
 }
-function pad(n){return String(n).padStart(2,'0');}
-window.clearResult=function(){
-  $('result-card').classList.remove('visible'); $('chunks-log').innerHTML=''; $('chunks-log').classList.remove('visible');
+
+window.cancelTranscription = function () {
+  cancelled = true; worker.postMessage({ type: 'cancel' });
+  setTimeout(() => {
+    if (cancelled) {
+      isTranscribing = false; releaseWakeLock(); swTell('TRANSCRIPTION_ENDED');
+      worker.terminate(); worker = newWorker(); worker.addEventListener('message', handleWorkerMessage);
+      modelReady = false; updateBtn();
+      $('load-btn').classList.remove('hidden'); $('load-btn').disabled = false;
+      $('load-btn').textContent = 'Recarregar modelo'; $('model-select').disabled = false;
+      hideProgress(); $('bg-notice').classList.remove('visible'); $('cancel-btn').classList.remove('visible');
+      setStatus('Cancelado — clique em Recarregar modelo', 'error');
+    }
+  }, 3000);
+  showToast('⏸️ Cancelando…');
+};
+
+window.toggleEdit = function () {
+  editMode = !editMode;
+  const box = $('transcript-box'), btn = $('edit-btn'), hint = $('edit-hint');
+  box.contentEditable = editMode ? 'true' : 'false'; box.classList.toggle('editing', editMode);
+  btn.textContent = editMode ? '✅ Concluir' : '✏️ Editar';
+  hint.textContent = editMode ? '✏️ Modo edição ativo' : '🔒 Somente leitura';
+  if (editMode) box.focus(); showToast(editMode ? '✏️ Edição ativada' : '✅ Edição encerrada');
+};
+window.copyText = function () {
+  navigator.clipboard.writeText($('transcript-box').textContent).then(() => showToast('Copiado! ✓')).catch(() => showToast('Erro ao copiar'));
+};
+window.downloadTxt = function () {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([$('transcript-box').textContent], { type: 'text/plain' }));
+  a.download = 'transcricao_' + new Date().toISOString().slice(0, 10) + '.txt'; a.click();
+};
+window.downloadSrt = function () {
+  let srt = '';
+  if (chunkTexts.length > 0 && chunkStartTimes.length > 0) {
+    chunkTexts.forEach((t, i) => {
+      if (!t?.trim()) return;
+      const st = chunkStartTimes[i] ?? 0, en = chunkEndTimes[i] ?? (st + 300);
+      srt += `${i + 1}\n${toSrtTime(st)} --> ${toSrtTime(en)}\n${t.trim()}\n\n`;
+    });
+  } else { const t = $('transcript-box').textContent; srt = `1\n${toSrtTime(0)} --> ${toSrtTime(0)}\n${t.trim()}\n\n`; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([srt], { type: 'text/plain' }));
+  a.download = 'transcricao_' + new Date().toISOString().slice(0, 10) + '.srt'; a.click();
+};
+function toSrtTime(s) {
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = Math.floor(s % 60), ms = Math.floor((s - Math.floor(s)) * 1000);
+  return `${pad(h)}:${pad(m)}:${pad(ss)},${String(ms).padStart(3, '0')}`;
+}
+function pad(n) { return String(n).padStart(2, '0'); }
+window.clearResult = function () {
+  $('result-card').classList.remove('visible'); $('chunks-log').innerHTML = ''; $('chunks-log').classList.remove('visible');
 };
 </script>
 </body>
