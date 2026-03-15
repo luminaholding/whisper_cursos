@@ -181,10 +181,10 @@
 <div id="chunk-row">
   <label for="chunk-select">Bloco de:</label>
   <select id="chunk-select">
-    <option value="60">1 minuto — mais leve</option>
+    <option value="30" selected>30 segundos ✅ ideal Whisper</option>
+    <option value="60">1 minuto</option>
+    <option value="120">2 minutos</option>
     <option value="180">3 minutos</option>
-    <option value="300" selected>5 minutos ✅ recomendado</option>
-    <option value="600">10 minutos</option>
   </select>
 </div>
 
@@ -214,7 +214,6 @@
       <div class="video-opt-info">
         📹 <strong>Vídeo detectado</strong> — extraia o áudio antes para melhor resultado.
       </div>
-      <!-- FIX ffmpeg: worker.js precisa ser blob da mesma origem para funcionar no mobile -->
       <button id="extract-btn" onclick="extractAudio()" disabled>🎬 Extrair áudio (ffmpeg)</button>
       <div id="extract-progress"></div>
     </div>
@@ -296,7 +295,6 @@ navigator.serviceWorker?.addEventListener('message', e => {
 });
 function swTell(type) { navigator.serviceWorker?.controller?.postMessage({ type }); }
 
-// WakeLock — impede Android de suspender a aba durante transcrição
 let wakeLock = null;
 async function acquireWakeLock() {
   if (!('wakeLock' in navigator)) return;
@@ -327,7 +325,7 @@ let cancelled = false, editMode = false;
 let chunkStartTimes = [], chunkEndTimes = [], chunkTexts = [];
 let transcriptionStartTime = 0, chunksCompleted = 0, totalChunks = 0;
 let currentSessionId = null;
-let currentPcm = null, currentSR = 16000, currentLang = null, currentChunkSec = 300, currentOverlap = 5;
+let currentPcm = null, currentSR = 16000, currentLang = null, currentChunkSec = 30, currentOverlap = 5;
 let pendingTranscription = false;
 
 const $ = id => document.getElementById(id);
@@ -516,7 +514,7 @@ window.resumePausedSession = async function () {
   const record = await db.get('paused_sessions', pendingPausedId);
   if (!record) return;
   chunkTexts = record.chunkTexts || []; chunkStartTimes = record.chunkStartTimes || []; chunkEndTimes = record.chunkEndTimes || [];
-  currentLang = record.language; currentChunkSec = record.chunkSeconds || 300;
+  currentLang = record.language; currentChunkSec = record.chunkSeconds || 30;
   currentOverlap = record.overlapSeconds || 5; currentSR = record.sampleRate || 16000;
   cancelled = false; chunksCompleted = record.fromChunk; transcriptionStartTime = Date.now();
   if (record.fullText) { $('transcript-box').textContent = record.fullText; $('result-card').classList.add('visible'); }
@@ -631,11 +629,7 @@ function setFile(f) {
   else $('video-options').classList.remove('visible');
   const mode = detectMode(f);
   if (mode === 'refuse') { showError(`Arquivo muito grande (${formatBytes(f.size)}). Exporte o áudio ou divida em partes.`); audioFile = null; updateBtn(); return; }
-  if (mode === 'heavy') {
-    $('heavy-banner').classList.add('visible'); $('chunk-select').value = '600';
-    const mv = $('model-select').value;
-    if (mv === 'Xenova/whisper-medium' || mv === 'Xenova/whisper-small') $('model-select').value = 'Xenova/whisper-base';
-  }
+  if (mode === 'heavy') { $('heavy-banner').classList.add('visible'); }
   updateBtn();
 }
 $('remove-file').onclick = e => {
@@ -645,7 +639,6 @@ $('remove-file').onclick = e => {
   hideError(); updateBtn();
 };
 
-// FIX ffmpeg: worker.js via toBlobURL para evitar erro de cross-origin no mobile
 window.extractAudio = async function () {
   if (!audioFile) return;
   const btn = $('extract-btn'), prog = $('extract-progress');
@@ -658,7 +651,6 @@ window.extractAudio = async function () {
     ffmpeg.on('log', ({ message }) => { prog.textContent = message.slice(0, 120); });
     ffmpeg.on('progress', ({ progress }) => { prog.textContent = `Convertendo… ${Math.round(progress * 100)}%`; });
     const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm';
-    // worker.js via toBlobURL — mesma origem, resolve o erro no Android/Samsung
     const workerURL = await toBlobURL(
       'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/worker.js',
       'text/javascript'
@@ -739,7 +731,6 @@ async function _doTranscribe(resumeFrom) {
   isTranscribing = true; await acquireWakeLock(); swTell('TRANSCRIPTION_STARTED');
   try {
     const arrayBuffer = await audioFile.arrayBuffer();
-    // SR real do hardware — nao forca 16000 aqui
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
     const realSR = audioBuffer.sampleRate;
@@ -747,12 +738,11 @@ async function _doTranscribe(resumeFrom) {
     const pcm = audioBuffer.getChannelData(0);
     currentLang = $('lang-select').value === 'auto' ? null : $('lang-select').value;
     currentChunkSec = parseInt($('chunk-select').value, 10);
-    currentOverlap = currentChunkSec >= 600 ? 2 : 5;
+    currentOverlap = 5; // sempre 5s de overlap
     const pcmCopy = pcm.slice(0);
     currentPcm = pcmCopy;
     audioCtx.close();
     showProgress('Enviando para Worker…', 15);
-    // Passa o SR REAL para o worker fazer resample correto para 16kHz
     worker.postMessage({
       type: 'transcribe', pcm: pcmCopy, language: currentLang,
       chunkSeconds: currentChunkSec, overlapSeconds: currentOverlap,
@@ -803,7 +793,7 @@ window.downloadSrt = function () {
   if (chunkTexts.length > 0 && chunkStartTimes.length > 0) {
     chunkTexts.forEach((t, i) => {
       if (!t?.trim()) return;
-      const st = chunkStartTimes[i] ?? 0, en = chunkEndTimes[i] ?? (st + 300);
+      const st = chunkStartTimes[i] ?? 0, en = chunkEndTimes[i] ?? (st + 30);
       srt += `${i + 1}\n${toSrtTime(st)} --> ${toSrtTime(en)}\n${t.trim()}\n\n`;
     });
   } else { const t = $('transcript-box').textContent; srt = `1\n${toSrtTime(0)} --> ${toSrtTime(0)}\n${t.trim()}\n\n`; }
